@@ -5,7 +5,7 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
 ## Stack and conventions
 
 - Plain HTML, CSS and JavaScript. No framework, no build step, no npm.
-- No external JS libraries. Google Fonts is the only external request.
+- No external JS libraries, with one approved exception: Google's `<model-viewer>` for the hero 3D model, loaded as a module from `https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js`. Keep the version pinned (there is no `latest` path on that CDN). Otherwise Google Fonts is the only external request.
 - Files:
   - `index.html` page structure
   - `css/style.css` all styles, colors as CSS custom properties on `:root`
@@ -14,6 +14,7 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
   - `media/loops/` short hover loops (MP4)
   - `media/posters/` poster frames for loops (JPG)
   - `media/stills/` still images (WebP)
+  - `media/models/` web 3D models (GLB). Exported from Ryan's .blend as a static, decimated mesh, 3 MB or less, no Draco (it needs an extra decoder request)
   - `source/` raw files from Drive. Git-ignored. Never reference from the site.
 - Media file names: `project-piece`, lowercase, hyphenated (e.g. `pangeo-lust.mp4`).
 - When media is missing, render a solid block in the project's accent color with its title. No broken images, no visible "placeholder" text.
@@ -60,7 +61,7 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
 ## Page sections (in order)
 
 1. **Nav:** RAYCRAYON wordmark left. Work, About, Contact right.
-2. **Hero:** big name, one-line role, one short sentence, and a featured loop or still. Suggested line: "3D worlds with a pulse."
+2. **Hero:** big name, one-line role, one short sentence, and Ryan's signature 3D character in `<model-viewer>` (`media/models/hero-character.glb`), layered on top of the RAYCRAYON wordmark so it stands on the name. Slow auto-rotate, drag to turn, no zoom, poster still while loading, no auto-rotate under reduced motion. Suggested line: "3D worlds with a pulse."
 3. **Selected work:** personal projects.
    - Felines (strip, see interactions)
    - Gumizoo (character collection)

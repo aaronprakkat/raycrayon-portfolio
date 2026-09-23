@@ -131,94 +131,13 @@
     });
   });
 
-  /* Hero turntable: 72 pre-rendered angles, 5° apart */
+  /* Hero model: no auto-rotate under reduced motion */
 
-  const turntable = document.querySelector('.turntable');
-  if (turntable) {
-    const img = turntable.querySelector('img');
-    const handle = turntable.querySelector('.turntable__handle');
-    const COUNT = 72;
-    const STEP = 360 / COUNT;
-    const SPEED = 360 / 12000;
-    const frameSrc = (i) => `media/stills/hero/hero-${String(i).padStart(2, '0')}.webp`;
-
-    let angle = 0;
-    let shown = 0;
-    let ready = false;
-    let inView = true;
-    let drag = null;
-    let resumeAt = 0;
-    let lastTime = 0;
-
-    const describe = (deg) => {
-      if (deg === 0) return 'Facing front';
-      if (deg === 180) return 'Facing away';
-      return `Turned ${deg} degrees`;
-    };
-
-    function show(nextAngle, announce) {
-      angle = ((nextAngle % 360) + 360) % 360;
-      const index = Math.round(angle / STEP) % COUNT;
-      if (index !== shown) {
-        shown = index;
-        img.src = frameSrc(index);
-      }
-      if (announce) {
-        const deg = Math.round(index * STEP);
-        handle.setAttribute('aria-valuenow', deg);
-        handle.setAttribute('aria-valuetext', describe(deg));
-      }
-    }
-
-    function tick(time) {
-      const running = ready && inView && !drag && !document.hidden && !reduceMotion.matches && time > resumeAt;
-      if (running && lastTime) show(angle + (time - lastTime) * SPEED, false);
-      lastTime = time;
-      requestAnimationFrame(tick);
-    }
-
-    const preload = () => {
-      const frames = Array.from({ length: COUNT }, (_, i) => {
-        const frame = new Image();
-        frame.src = frameSrc(i);
-        return frame.decode().catch(() => {});
-      });
-      Promise.all(frames).then(() => {
-        ready = true;
-        requestAnimationFrame(tick);
-      });
-    };
-    if (document.readyState === 'complete') preload();
-    else addEventListener('load', preload, { once: true });
-
-    new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; }).observe(turntable);
-
-    handle.addEventListener('pointerdown', (e) => {
-      drag = { x: e.clientX, angle };
-      handle.setPointerCapture(e.pointerId);
-      turntable.classList.add('is-dragging');
-    });
-    handle.addEventListener('pointermove', (e) => {
-      if (drag) show(drag.angle - (e.clientX - drag.x) * 0.6, true);
-    });
-    const endDrag = () => {
-      if (!drag) return;
-      drag = null;
-      resumeAt = performance.now() + 1500;
-      turntable.classList.remove('is-dragging');
-    };
-    handle.addEventListener('pointerup', endDrag);
-    handle.addEventListener('pointercancel', endDrag);
-
-    handle.addEventListener('keydown', (e) => {
-      const moves = { ArrowRight: -15, ArrowUp: -15, ArrowLeft: 15, ArrowDown: 15 };
-      if (e.key in moves) show(angle + moves[e.key], true);
-      else if (e.key === 'Home') show(0, true);
-      else if (e.key === 'End') show(180, true);
-      else return;
-      e.preventDefault();
-      resumeAt = performance.now() + 4000;
-    });
+  const heroModel = document.querySelector('.hero__model');
+  if (heroModel) {
+    const syncMotion = () => heroModel.toggleAttribute('auto-rotate', !reduceMotion.matches);
+    syncMotion();
+    reduceMotion.addEventListener('change', syncMotion);
   }
 
   /* Felines: the band takes the colour of the hovered or focused piece */

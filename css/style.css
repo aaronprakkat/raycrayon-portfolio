@@ -144,17 +144,48 @@ button { font: inherit; color: inherit; }
   .nav__links { margin-right: -9px; }
 }
 
-/* Hero */
+/* Hero: the model stands on the wordmark. --rise is how much of the model box sits above the name. */
+.hero {
+  --model: min(86vw, 50svh, 540px);
+  --rise: .91;
+}
 .hero .wrap {
-  display: grid;
-  gap: 32px 48px;
-  padding-block: clamp(28px, 5vw, 56px) clamp(48px, 6vw, 88px);
+  padding-block: clamp(20px, 3vw, 40px) clamp(48px, 6vw, 88px);
+}
+.hero__stage {
+  position: relative;
+  padding-top: calc(var(--model) * var(--rise));
 }
 .hero__name {
-  margin: 14px 0 18px;
-  font: 400 clamp(64px, 22.5vw, 132px)/.82 var(--display);
+  font: 400 min(calc((100vw - 2 * var(--gutter)) / 3.95), calc(var(--max) / 3.95))/.82 var(--display);
   letter-spacing: .01em;
+  text-align: center;
   white-space: nowrap;
+}
+.hero__model {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 1;
+  width: var(--model);
+  height: var(--model);
+  transform: translateX(-50%);
+  background: transparent;
+  --poster-color: transparent;
+  --progress-bar-color: transparent;
+}
+.hero__model:not(:defined) {
+  background: url("../media/stills/hero-character.webp") center / contain no-repeat;
+}
+.hero__foot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px 32px;
+  margin-top: clamp(20px, 3vw, 36px);
 }
 .hero__name span {
   display: inline-block;
@@ -171,40 +202,6 @@ button { font: inherit; color: inherit; }
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 28px;
-}
-
-.turntable {
-  position: relative;
-  width: min(100%, 440px);
-  aspect-ratio: 1;
-  margin-inline: auto;
-}
-.turntable img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none;
-  -webkit-user-drag: none;
-}
-.turntable__handle {
-  position: absolute;
-  inset: 0;
-  cursor: grab;
-  touch-action: pan-y;
-}
-.turntable.is-dragging .turntable__handle { cursor: grabbing; }
-.turntable__hint { margin-top: 6px; text-align: center; }
-
-@media (min-width: 900px) {
-  .hero .wrap {
-    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
-    align-items: center;
-    min-height: calc(100svh - var(--nav-h));
-  }
-  .hero__name { font-size: min(13.4vw, 204px); }
-  .turntable { width: min(100%, 66svh, 600px); }
 }
 
 /* Section bands */
