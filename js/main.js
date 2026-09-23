@@ -140,6 +140,36 @@
     reduceMotion.addEventListener('change', syncMotion);
   }
 
+  /* Hero model pops out of the bottom comic panel: hover on mouse, tap on touch, Enter/Space on keyboard */
+
+  const heroStage = document.querySelector('.hero__stage');
+  const heroPanel = heroStage && heroStage.querySelector('.comic-panel--5');
+  if (heroPanel && heroModel) {
+    const rise = (on) => heroStage.classList.toggle('is-risen', on);
+    const risen = () => heroStage.classList.contains('is-risen');
+    let tapStart = null;
+
+    heroPanel.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') rise(true); });
+    heroPanel.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') rise(false); });
+    heroPanel.addEventListener('pointerdown', (e) => {
+      tapStart = e.pointerType === 'mouse' ? null : { x: e.clientX, y: e.clientY };
+    });
+    heroPanel.addEventListener('pointerup', (e) => {
+      if (!tapStart) return;
+      const moved = Math.hypot(e.clientX - tapStart.x, e.clientY - tapStart.y);
+      tapStart = null;
+      if (moved < 10) rise(!risen());
+    });
+    heroPanel.addEventListener('pointercancel', () => { tapStart = null; });
+
+    heroModel.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      rise(!risen());
+    });
+    heroModel.addEventListener('blur', () => rise(false));
+  }
+
   /* Felines: the band takes the colour of the hovered or focused piece */
 
   const felines = document.getElementById('felines');

@@ -11,11 +11,11 @@ Legend: ✅ uploaded to Drive · ⏳ waiting on Ryan · 🔧 loop/poster made
 | Slug | Title | Type | Accent | Status | Notes |
 |---|---|---|---|---|---|
 | felines-01 | Feline #1, House Cat | Personal | `#FF7A6B` | ⏳ | 10-day challenge w/ @supersolarian |
-| felines-02 | Feline #2, Jaguar | Personal | `#6EC8FF` | ✅🔧 | File: `0001-yaycat.mp4` (received 2026-09-24) |
+| felines-02 | Feline #2, Jaguar | Personal | `#6EC8FF` | ⏳ | |
 | felines-03 | Feline #3, Cheetah | Personal | `#C6F24E` | ⏳ | "Lemon flavour" |
 | felines-04 | Feline #4, Lion | Personal | `#FF6A1A` | ⏳ | "Ketchup and mustard" |
 | felines-05 | Feline #5, Lynx | Personal | `#FF4FB8` | ⏳ | Hot pink |
-| felines-06 | Feline #6, Ocelot | Personal | `#16A6A0` | ✅🔧 | Finished poster is `ocelote_1.mp4` from the Drive folder; the board uses it. The process breakdown image has not been received. |
+| felines-06 | Feline #6, Ocelot | Personal | `#16A6A0` | ✅ (breakdown image only) | **Finished poster artwork not yet seen — only the process breakdown exists** (`media/stills/felines-06-breakdown.png`). Ask Ryan for the actual finished piece. |
 | felines-07 | Feline #7, Panther | Personal | `#B38CFF` | ⏳ | Lavender |
 | felines-08–10 | Feline #8–10 | Personal | TBD | ⏳ | Not yet seen anywhere |
 | gumizoo | Gumizoo (character collection) | Personal | TBD | ⏳ | |
@@ -29,6 +29,8 @@ Legend: ✅ uploaded to Drive · ⏳ waiting on Ryan · 🔧 loop/poster made
 | funk-house | Funk House Media — video editing | Client | `#26E1DD` | ⏳ | No visuals yet |
 | headshot | About-section photo | — | — | ⏳ | |
 | hero-model | Hero 3D model | — | — | ✅ | `.glb` received, wired into `<model-viewer>` |
+
+The hero no longer uses any named video files — it's built entirely from CSS/SVG comic-panel textures (see `01-brand-and-design-system.md`, "Hero comic-panel texture"). `Nanju_render`, `colourgradebear_1` and `Aquarius`, named for an earlier stacked-video hero concept that's since been replaced, are no longer needed there and were dropped from this table. Aquarius is real Ryan artwork (part of the Pangeo Valentine's set — Eros/Philia/Ludus/Aquarius) and could still be added to the work grid later if wanted; `Nanju_render` and `colourgradebear_1`'s identity/context was never confirmed and doesn't need chasing unless a use for them comes up elsewhere.
 
 ## Felines — design breakdown
 
@@ -44,7 +46,7 @@ Each Feline's detail board is built from six fields present for every piece, whe
 **Feline #1 — House Cat**
 - Style: Warm pink-to-orange gradient ground; softer, rounder toy-blob forms than the later pieces.
 - Elements used: inflated cream/peach claw-paw forms; cobalt triangular claw tips; one pink dagger-like spike; a concentric blue-and-purple dial resembling an iris; a small gold star-shaped cat head with ears on top.
-- Explanation: Ryan wrote no process caption, only a credit to @azpeger.tat's cat photos as inspiration (shown as a note). **Drafted caption, not Ryan's words — get his approval or replacement:** "Day one, starting soft. Strawberry peach with a few blueberry claws."
+- Explanation: No process caption beyond a credit to @azpeger.tat's cat photos as inspiration — visual description only, nothing invented.
 
 **Feline #2 — Jaguar**
 - Style: Cool icy blue, swirling vortex background, more mechanical/interlocking than organic.
@@ -67,9 +69,8 @@ Each Feline's detail board is built from six fields present for every piece, whe
 - Explanation: "I wanted to be more abstract with the face design, which is surprisingly the most satisfying part of the challenge." Credits @mehu1x's Adobe subscription as making the piece possible.
 
 **Feline #6 — Ocelot**
-- Style: Teal on a near-black ground, the darkest backdrop in the series, with yellow and red cutting through like flames. (Written from the finished poster, `ocelote_1.mp4`.)
-- Elements used: glossy teal and aqua tube forms; yellow ribbon swirls and flame curls; red flame droplets; red spiked starbursts; small crown-like yellow and red clusters.
-- Explanation: no caption from Ryan known. **Drafted caption, not Ryan's words — get his approval or replacement:** "Mint, mango and a bit of chilli. Still haven't eaten." (A process breakdown image, Solid Viewport → Eevee → Cycles+Lighting, reportedly exists but hasn't been received.)
+- Style, Elements used: **unknown — the finished poster artwork has never been seen.** Only the process breakdown image exists (three stages: Solid Viewport → Eevee → Cycles+Lighting). Do not write style/elements copy until the final artwork is obtained from Ryan.
+- Explanation: none available yet.
 
 **Feline #7 — Panther**
 - Style: Lavender/purple, the most "mecha" piece in the series — concentric mechanical dial forms rather than soft blobs.
@@ -80,7 +81,8 @@ Each Feline's detail board is built from six fields present for every piece, whe
 
 ## Open questions
 
-- **Drafted captions for Feline #1 and #6** are live on the site in Ryan's voice. Ask him to approve or rewrite them.
+- **Feline #6's finished poster artwork — ask Ryan directly.** The one piece with no visual description possible right now.
 - What are `0200.mp4` and `final aniamtion blr 2025.mp4` exactly?
 - Confirm Ryan's domain name before the Vercel domain step.
 - Felines #8–10, Gumizoo, ASTERISK and Funk House Media — style/elements/explanation breakdowns still needed once those files arrive, using the same six-field method above.
+- Aquarius (real Pangeo Valentine's-set piece) isn't slotted into the work grid yet — worth deciding if/where it goes.
