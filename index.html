@@ -102,14 +102,25 @@
         </div>
       </section>
 
-      <section class="band" id="gumizoo" aria-labelledby="gumizoo-title">
-        <div class="wrap project project--tall">
-          <div class="project__info">
+      <section class="band gumizoo" id="gumizoo" aria-labelledby="gumizoo-title">
+        <div class="wrap gumizoo__grid">
+          <div class="gumizoo__intro">
             <p class="label">Character collection</p>
             <h3 class="project-title" id="gumizoo-title">Gumizoo</h3>
             <p>A zoo of gummy characters, each with a name and a flavour.</p>
+            <p class="label gumizoo__materials">PLA+ filament, wood filler, primer, acrylic paint.</p>
           </div>
-          <div class="project__cards" data-group="gumizoo"></div>
+          <figure class="gumizoo__display">
+            <div class="gumizoo__layers"></div>
+            <figcaption class="gumizoo__caption" aria-hidden="true">
+              <span class="gumizoo__caption-name"></span>
+              <span class="gumizoo__caption-trait"></span>
+            </figcaption>
+          </figure>
+          <div class="gumizoo__roster">
+            <h4 class="gumizoo__tagline">Four forms of stupidity</h4>
+            <ul class="gumizoo__list"></ul>
+          </div>
         </div>
       </section>
 
@@ -270,6 +281,16 @@
           <p class="board__observation"></p>
         </div>
       </section>
+    </article>
+  </dialog>
+
+  <dialog class="board gumi-panel" id="gumi-panel" aria-labelledby="gumi-panel-name">
+    <button class="pill board__close js-fill" type="button">Close</button>
+    <article class="gumi-panel__sheet">
+      <figure class="gumi-panel__portrait"><img alt="" width="1280" height="960"></figure>
+      <h2 class="gumi-panel__stamp" id="gumi-panel-name"></h2>
+      <p class="gumi-panel__trait"></p>
+      <div class="gumi-panel__more"></div>
     </article>
   </dialog>
 

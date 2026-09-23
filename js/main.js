@@ -331,7 +331,139 @@
     if (boardCard) boardCard.focus();
   });
 
+  /* Gumizoo: roster rows preview each character in the display window; clicking opens a detail panel */
+
+  const gumizoo = document.getElementById('gumizoo');
+  const gumiPanel = document.getElementById('gumi-panel');
+  let openGumi = () => {};
+
+  if (gumizoo && gumiPanel && typeof GUMIZOO !== 'undefined') {
+    const display = gumizoo.querySelector('.gumizoo__display');
+    const layers = gumizoo.querySelector('.gumizoo__layers');
+    const caption = gumizoo.querySelector('.gumizoo__caption');
+    const list = gumizoo.querySelector('.gumizoo__list');
+    const portrait = gumiPanel.querySelector('.gumi-panel__portrait');
+    const portraitImg = portrait.querySelector('img');
+    const layerFor = {};
+    const bySlug = (slug) => GUMIZOO.characters.find((c) => c.slug === slug);
+    const srcset = (c) => `media/stills/gumizoo-${c.slug}-640.webp 640w, media/stills/gumizoo-${c.slug}.webp 1280w`;
+
+    const posterLayer = h('div', { class: 'gumizoo__layer gumizoo__layer--poster is-active' },
+      h('img', { src: GUMIZOO.poster.src, alt: GUMIZOO.poster.alt, loading: 'lazy', decoding: 'async' }));
+    layers.append(posterLayer);
+
+    for (const c of GUMIZOO.characters) {
+      const layer = h('div', { class: 'gumizoo__layer', 'aria-hidden': 'true' }, h('img', {
+        src: `media/stills/gumizoo-${c.slug}-640.webp`, srcset: srcset(c), sizes: '(min-width: 900px) 400px, 100vw',
+        alt: c.alt, loading: 'lazy', decoding: 'async',
+      }));
+      layer.style.setProperty('--layer-bg', c.bg);
+      layers.append(layer);
+      layerFor[c.slug] = layer;
+
+      const row = h('button', {
+        type: 'button', class: 'gumizoo__row', 'data-slug': c.slug, 'aria-haspopup': 'dialog',
+        'aria-label': `${c.name} ${c.surname}: ${c.trait}`,
+      }, [
+        h('span', { class: 'gumizoo__chip', 'aria-hidden': 'true' },
+          h('img', { src: `media/stills/gumizoo-${c.slug}-chip.webp`, alt: '', width: '56', height: '56', loading: 'lazy' })),
+        h('span', { class: 'gumizoo__row-name' }, [c.name, ' ', h('span', { class: 'gumizoo__row-surname' }, c.surname)]),
+      ]);
+      setAccent(row, c.accent);
+      list.append(h('li', {}, row));
+    }
+
+    let shown = null;
+    const show = (c) => {
+      const active = c ? layerFor[c.slug] : posterLayer;
+      for (const layer of layers.children) {
+        const on = layer === active;
+        layer.classList.toggle('is-active', on);
+        if (on) layer.removeAttribute('aria-hidden');
+        else layer.setAttribute('aria-hidden', 'true');
+      }
+      display.classList.toggle('is-previewing', Boolean(c));
+      if (c) {
+        setAccent(caption, c.accent);
+        caption.querySelector('.gumizoo__caption-name').textContent = `${c.name} ${c.surname}`;
+        caption.querySelector('.gumizoo__caption-trait').textContent = c.trait;
+      }
+      shown = c;
+    };
+
+    list.addEventListener('pointerover', (e) => {
+      const row = e.target.closest('.gumizoo__row');
+      if (row && e.pointerType === 'mouse') show(bySlug(row.dataset.slug));
+    });
+    list.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'mouse' && !list.contains(document.activeElement)) show(null);
+    });
+    list.addEventListener('focusin', (e) => {
+      const row = e.target.closest('.gumizoo__row');
+      if (row) show(bySlug(row.dataset.slug));
+    });
+    list.addEventListener('focusout', (e) => {
+      if (!list.contains(e.relatedTarget) && !gumiPanel.open) show(null);
+    });
+
+    let gumiRow = null;
+    let gumiSource = null;
+    const inView = (el) => {
+      const r = el.getBoundingClientRect();
+      return r.bottom > 0 && r.top < innerHeight;
+    };
+
+    openGumi = (row) => {
+      const c = bySlug(row.dataset.slug);
+      gumiRow = row;
+      gumiSource = shown === c && inView(display) ? layerFor[c.slug] : row.querySelector('.gumizoo__chip');
+      gumiSource.style.viewTransitionName = 'gumi-portrait';
+      morph(() => {
+        gumiSource.style.viewTransitionName = '';
+        setAccent(gumiPanel, c.accent);
+        portraitImg.src = `media/stills/gumizoo-${c.slug}.webp`;
+        portraitImg.srcset = srcset(c);
+        portraitImg.sizes = '(min-width: 900px) 560px, 100vw';
+        portraitImg.alt = c.alt;
+        gumiPanel.querySelector('.gumi-panel__stamp').textContent = `${c.name} ${c.surname}`;
+        gumiPanel.querySelector('.gumi-panel__trait').textContent = c.trait;
+        portrait.style.viewTransitionName = 'gumi-portrait';
+        document.documentElement.classList.add('is-locked');
+        gumiPanel.showModal();
+        gumiPanel.scrollTop = 0;
+      }).finally(() => { portrait.style.viewTransitionName = ''; });
+    };
+
+    const closeGumi = () => {
+      if (!gumiPanel.open) return;
+      portrait.style.viewTransitionName = 'gumi-portrait';
+      morph(() => {
+        portrait.style.viewTransitionName = '';
+        if (gumiSource) gumiSource.style.viewTransitionName = 'gumi-portrait';
+        gumiPanel.close();
+      }).finally(() => { if (gumiSource) gumiSource.style.viewTransitionName = ''; });
+    };
+
+    gumiPanel.querySelector('.board__close').addEventListener('click', closeGumi);
+    gumiPanel.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      closeGumi();
+    });
+    gumiPanel.addEventListener('click', (e) => {
+      if (!e.target.closest('.gumi-panel__sheet > *, .board__close')) closeGumi();
+    });
+    gumiPanel.addEventListener('close', () => {
+      document.documentElement.classList.remove('is-locked');
+      if (gumiRow) gumiRow.focus();
+    });
+  }
+
   document.addEventListener('click', (e) => {
+    const row = e.target.closest('.gumizoo__row');
+    if (row) {
+      openGumi(row);
+      return;
+    }
     const card = e.target.closest('.card[data-slug]');
     if (!card) return;
     const p = PROJECTS.find((x) => x.slug === card.dataset.slug);

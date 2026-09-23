@@ -94,12 +94,6 @@ const PROJECTS = [
     },
   },
   {
-    slug: 'gumizoo', group: 'gumizoo', title: 'Gumizoo', meta: 'Characters', accent: '#86B83A', ratio: '9 / 16',
-    still: 'media/stills/gumizoo.webp',
-    alt: 'Gumizoo poster: a green gummy character behind pink “Gumi Zoo” lettering',
-    film: '', year: '', role: '', context: 'A collection of gummy characters: Ashik Rancher, Gia Tangerine, Nanju Jam and Rana Ghee.',
-  },
-  {
     slug: 'pangeo-pride', group: 'pangeo', title: 'Pride', meta: 'Pangeo', accent: '#FF3DAC', ratio: '16 / 9',
     loop: 'media/loops/pangeo-pride.mp4', poster: 'media/posters/pangeo-pride.jpg',
     alt: 'Pride: collaged bands of a sunlit god, chameleons, fish and palms across a classical arcade',
@@ -146,3 +140,29 @@ const PROJECTS = [
     film: '', year: '2024', role: 'Junior video editor', context: 'Promotional videos for social media and ad campaigns.',
   },
 ];
+
+// accent is sampled from each character's body in its portrait; bg is the portrait's backdrop, used to fill the display window.
+const GUMIZOO = {
+  poster: {
+    src: 'media/stills/gumizoo.webp',
+    alt: 'Gumizoo event poster: a green gummy character behind pink “Gumi Zoo” lettering, listing the four available gumis',
+  },
+  characters: [
+    {
+      slug: 'ashik-rancher', name: 'Ashik', surname: 'Rancher', trait: 'Hard-headed.', accent: '#B72D03', bg: '#5F0C8C',
+      alt: 'Ashik Rancher: a red-orange 3D gummy monkey head with jagged teeth and a scowl, on purple',
+    },
+    {
+      slug: 'gia-tangerine', name: 'Gia', surname: 'Tangerine', trait: 'Gluttonous.', accent: '#8C4079', bg: '#CF046B',
+      alt: 'Gia Tangerine: a purple 3D gummy monkey head with teal hair and a long blue tongue, on magenta',
+    },
+    {
+      slug: 'nanju-jam', name: 'Nanju', surname: 'Jam', trait: 'Gambling-type stupid.', accent: '#9A8807', bg: '#F4B60C',
+      alt: 'Nanju Jam: an olive-green 3D gummy monkey head with dripping hair and clenched teeth, on yellow',
+    },
+    {
+      slug: 'rana-ghee', name: 'Rana', surname: 'Ghee', trait: 'Boy-crazy.', accent: '#CF6C74', bg: '#1E4BC8',
+      alt: 'Rana Ghee: a pink 3D gummy monkey head with purple hair, star eyes and a blue tongue, on blue',
+    },
+  ],
+};
