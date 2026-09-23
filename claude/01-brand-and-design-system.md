@@ -74,7 +74,7 @@ The Felines detail panel is a mood-board style layout, not a single centered ima
 
 All six fields exist for every Feline card — this is what makes the boards feel uniform. Content length varies (some Explanation fields are one real sentence, others are a short visual description), but the *shape* of every board is the same. Do not add a field that only some pieces have (like a "process breakdown image") back into this list — if a piece has bonus real material like that, treat it as a visual variation within the "main render" or "elements used" area, not a structural element other boards are missing.
 
-If a piece's real content isn't known yet (currently true for Feline #6 — the finished artwork itself hasn't been seen, only a process breakdown image), leave Style/Elements/Explanation blank or show only what's confirmed rather than inventing plausible-sounding copy. See the tracker doc's open questions.
+If a piece's real content isn't known yet, leave Style/Elements/Explanation blank or show only what's confirmed rather than inventing plausible-sounding copy. The one exception so far: Feline #1 and #6 carry captions drafted in Ryan's voice at Aaron's request, flagged `captionDraft` in `js/projects.js` and in the tracker until Ryan approves them. See the tracker doc's open questions.
 
 Presentation: main render largest and centered-ish; palette, style, font and elements as smaller supporting cards/tags scattered around it at slight rotations; explanation as a torn-sticky-note-style card. Consistent treatment across all seven so the "system" reads as one thing even as each board's color and content differ.
 

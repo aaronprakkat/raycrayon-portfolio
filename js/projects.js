@@ -3,6 +3,7 @@
 // board (Felines): palette is sampled from the artwork; style, elements and caption come from
 // claude/03-project-tracker.md. caption is Ryan's own words; note is a plain visual observation.
 // Leave a field out when it isn't known rather than writing placeholder copy.
+// captionDraft: true marks a caption we wrote in Ryan's voice; replace it once he approves or rewrites it.
 const PROJECTS = [
   {
     slug: 'felines-01', group: 'felines', title: 'Feline #1', meta: 'House Cat', accent: '#FF7A6B', ratio: '9 / 16',
@@ -13,12 +14,22 @@ const PROJECTS = [
       palette: ['#F9B6F5', '#F27776', '#3340F4', '#EA0F70', '#F39B25'],
       style: 'Warm pink-to-orange gradient ground; softer, rounder toy-blob forms than the later pieces.',
       elements: ['Inflated cream and peach claw-paw forms', 'Cobalt triangular claw tips', 'One pink dagger-like spike', 'Concentric blue-and-purple dial, like an iris', 'Small gold star-shaped cat head with ears'],
+      caption: 'Day one, starting soft. Strawberry peach with a few blueberry claws.',
+      captionDraft: true,
       note: 'Inspired by @azpeger.tat’s cat photos.',
     },
   },
   {
     slug: 'felines-02', group: 'felines', title: 'Feline #2', meta: 'Jaguar', accent: '#6EC8FF', ratio: '9 / 16',
-    film: '', year: '', role: '', context: '',
+    loop: 'media/loops/felines-02.mp4', poster: 'media/posters/felines-02.jpg',
+    alt: 'Feline #2: pale blue 3D rings and a rosette-patterned cat wrapped in hot-pink spiked chains on an icy blue swirl',
+    film: '', year: '', role: '', context: 'My laptop hasn’t gotten a break from rendering.',
+    board: {
+      palette: ['#B1E2FB', '#64CAF7', '#E874D8', '#F7CFF7', '#2FB1E4'],
+      style: 'Cool icy blue, swirling vortex background, more mechanical and interlocking than organic.',
+      elements: ['Pale blue glossy interlocked ring and donut forms', 'Hot-pink spiked chain wrapping through them', 'Rosette-patterned blue cat at the centre', 'Paw-print detail'],
+      caption: 'My laptop hasn’t gotten a break from rendering.',
+    },
   },
   {
     slug: 'felines-03', group: 'felines', title: 'Feline #3', meta: 'Cheetah', accent: '#C6F24E', ratio: '9 / 16',
@@ -60,8 +71,15 @@ const PROJECTS = [
   {
     slug: 'felines-06', group: 'felines', title: 'Feline #6', meta: 'Ocelot', accent: '#16A6A0', ratio: '9 / 16',
     loop: 'media/loops/felines-06.mp4', poster: 'media/posters/felines-06.jpg',
-    alt: 'Feline #6: a teal 3D ocelot with yellow and red splashes',
+    alt: 'Feline #6: glossy teal 3D forms with yellow ribbons and red flames on a near-black ground',
     film: '', year: '', role: '', context: '',
+    board: {
+      palette: ['#31FDD9', '#F1EE11', '#13A27F', '#061F19', '#DB1A0D'],
+      style: 'Teal on a near-black ground, the darkest backdrop in the series, with yellow and red cutting through like flames.',
+      elements: ['Glossy teal and aqua tube forms', 'Yellow ribbon swirls and flame curls', 'Red flame droplets', 'Red spiked starbursts', 'Small crown-like yellow and red clusters'],
+      caption: 'Mint, mango and a bit of chilli. Still haven’t eaten.',
+      captionDraft: true,
+    },
   },
   {
     slug: 'felines-07', group: 'felines', title: 'Feline #7', meta: 'Panther', accent: '#B38CFF', ratio: '9 / 16',
