@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Raycrayon · 3D and Visual Designer</title>
+  <meta name="description" content="Ryan Abraham Thomas (Raycrayon), a 3D and visual designer in Bangalore. 3D worlds with a pulse.">
+  <meta name="theme-color" content="#FAF8F2">
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/projects.js" defer></script>
+  <script src="js/main.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#work">Skip to work</a>
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="nav__mark" href="#top">Raycrayon</a>
+      <nav aria-label="Main">
+        <ul class="nav__links">
+          <li><a class="pill pill--quiet js-fill" href="#work">Work</a></li>
+          <li><a class="pill pill--quiet js-fill" href="#about">About</a></li>
+          <li><a class="pill pill--quiet js-fill" href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-name">
+      <div class="wrap">
+        <div class="hero__text">
+          <p class="label">3D | Visual Designer · Bangalore</p>
+          <h1 class="hero__name" id="hero-name" aria-label="Raycrayon"><span aria-hidden="true">R</span><span aria-hidden="true">A</span><span aria-hidden="true">Y</span><span aria-hidden="true">C</span><span aria-hidden="true">R</span><span aria-hidden="true">A</span><span aria-hidden="true">Y</span><span aria-hidden="true">O</span><span aria-hidden="true">N</span></h1>
+          <p class="hero__line">3D worlds with a pulse.</p>
+          <div class="hero__actions">
+            <a class="pill js-fill" href="#work">See the work</a>
+            <a class="pill js-fill" href="#contact">Get in touch</a>
+          </div>
+        </div>
+        <figure class="hero__figure">
+          <div class="turntable">
+            <img src="media/stills/hero/hero-00.webp" width="900" height="900" fetchpriority="high"
+                 alt="Raycrayon’s signature character: a red, monkey-like 3D figure with green shorts, hands and feet">
+            <div class="turntable__handle" tabindex="0" role="slider" aria-label="Turn the character"
+                 aria-valuemin="0" aria-valuemax="355" aria-valuenow="0" aria-valuetext="Facing front"></div>
+          </div>
+          <figcaption class="label turntable__hint">Drag to turn</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <div id="work">
+      <section class="band band--intro" aria-labelledby="work-title">
+        <div class="wrap section-head">
+          <p class="label">Selected work</p>
+          <h2 class="display" id="work-title">Personal projects</h2>
+        </div>
+      </section>
+
+      <section class="band felines" id="felines" aria-labelledby="felines-title">
+        <div class="wrap">
+          <div class="project-head">
+            <h3 class="project-title" id="felines-title">Felines</h3>
+            <p>A ten-day art challenge with @supersolarian. One cat a day, one colour each.</p>
+          </div>
+          <ul class="strip" data-group="felines"></ul>
+        </div>
+      </section>
+
+      <section class="band" id="gumizoo" aria-labelledby="gumizoo-title">
+        <div class="wrap project project--tall">
+          <div class="project__info">
+            <p class="label">Character collection</p>
+            <h3 class="project-title" id="gumizoo-title">Gumizoo</h3>
+            <p>A zoo of gummy characters, each with a name and a flavour.</p>
+          </div>
+          <div class="project__cards" data-group="gumizoo"></div>
+        </div>
+      </section>
+
+      <section class="band pangeo" id="pangeo" aria-labelledby="pangeo-title">
+        <div class="wrap">
+          <div class="project-head">
+            <div>
+              <p class="label">Projection mapping · Season One Inc.</p>
+              <h3 class="project-title" id="pangeo-title">Pangeo</h3>
+            </div>
+            <p>Visuals for an immersive stage experience, built for a large-scale space with composition, scale, movement and audience perspective in mind.</p>
+          </div>
+          <div class="grid grid--wide" data-group="pangeo"></div>
+        </div>
+      </section>
+
+      <section class="band" id="mystery-shack" aria-labelledby="mystery-title">
+        <div class="wrap project project--flip">
+          <div class="project__info">
+            <p class="label">Tribute</p>
+            <h3 class="project-title" id="mystery-title">Mystery Shack</h3>
+            <p>A love letter to Gravity Falls, rebuilt in 3D.</p>
+          </div>
+          <div class="project__cards" data-group="mystery-shack"></div>
+        </div>
+      </section>
+
+      <section class="band" id="more" aria-labelledby="more-title">
+        <div class="wrap">
+          <div class="project-head">
+            <h3 class="project-title" id="more-title">More personal work</h3>
+          </div>
+          <div class="grid" data-group="personal"></div>
+        </div>
+      </section>
+
+      <section class="band band--rule" id="clients" aria-labelledby="clients-title">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="label">Commissions</p>
+            <h2 class="display" id="clients-title">Client work</h2>
+          </div>
+          <div class="grid" data-group="client"></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="band band--rule" id="experience" aria-labelledby="experience-title">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="label">CV</p>
+          <h2 class="display" id="experience-title">Experience</h2>
+        </div>
+        <ol class="xp">
+          <li>
+            <p class="label xp__years">2026 – Present</p>
+            <div><h3 class="xp__role">3D Artist</h3><p class="xp__org">ASTERISK, Bangalore</p></div>
+            <p class="xp__desc">Design and development of 3D-printed accessories for footwear: modelling, refinement and visual development, exploring form, proportion, materials and print feasibility.</p>
+          </li>
+          <li>
+            <p class="label xp__years">2024 – 2026</p>
+            <div><h3 class="xp__role">Projection Mapping Artist</h3><p class="xp__org">Season One Inc., Bangalore</p></div>
+            <p class="xp__desc">Visual development and setup of an immersive stage experience for Pangeo. 3D and digital visuals built for a large-scale immersive environment, considering composition, scale, movement and audience perspective.</p>
+          </li>
+          <li>
+            <p class="label xp__years">2025</p>
+            <div><h3 class="xp__role">Junior Visual Intern</h3><p class="xp__org">70EMG, Mumbai</p></div>
+            <p class="xp__desc">Visual and video content for events and social media: promotional graphics, digital assets and short-form content.</p>
+          </li>
+          <li>
+            <p class="label xp__years">2024</p>
+            <div><h3 class="xp__role">Junior Video Editor</h3><p class="xp__org">Funk House Media, Bangalore</p></div>
+            <p class="xp__desc">Promotional videos for social media and ad campaigns: footage, graphics, music, transitions and motion.</p>
+          </li>
+        </ol>
+
+        <h3 class="label xp__heading">Education</h3>
+        <ol class="xp">
+          <li>
+            <p class="label xp__years">2022 – 2026</p>
+            <div><h4 class="xp__role">Bachelor of Design</h4><p class="xp__org">Srishti Manipal Institute of Art, Design and Technology, Bangalore</p></div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="band band--rule" id="about" aria-labelledby="about-title">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="label">About</p>
+          <h2 class="display" id="about-title">Ryan Abraham Thomas</h2>
+        </div>
+        <div class="about">
+          <p class="about__bio">My passion for visual art comes from a constant curiosity to understand how things can be imagined, created, and brought to life. I enjoy exploring 3D modelling, digital illustration, motion graphics, and video as different ways of expressing an idea and telling a story. I’m driven by experimentation, attention to detail, and the desire to keep learning and pushing my creative boundaries.</p>
+          <div class="about__lists">
+            <div>
+              <h3 class="label">Skills</h3>
+              <ul class="tags">
+                <li>3D modelling</li><li>Motion graphics</li><li>Video editing</li><li>Projection mapping</li>
+                <li>3D printing</li><li>Visual storytelling</li><li>Illustration</li>
+              </ul>
+            </div>
+            <div>
+              <h3 class="label">Software</h3>
+              <ul class="tags">
+                <li>Blender</li><li>Premiere Pro</li><li>After Effects</li><li>Photoshop</li>
+                <li>Illustrator</li><li>Bambu Studio</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band band--rule contact" id="contact" aria-labelledby="contact-title">
+      <div class="wrap">
+        <h2 class="label" id="contact-title">Contact</h2>
+        <a class="contact__email js-fill" href="mailto:ryanabrahamthomas@gmail.com">ryanabrahamthomas@<wbr>gmail.com</a>
+        <p class="contact__links">
+          <a class="pill js-fill" href="https://www.instagram.com/raycrayon_" rel="noopener">Instagram @raycrayon_</a>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="label">© 2026 Ryan Abraham Thomas</p>
+      <p class="label">Raycrayon</p>
+    </div>
+  </footer>
+
+  <dialog class="player" id="player" aria-labelledby="player-title">
+    <div class="player__bar">
+      <button class="pill player__close js-fill" type="button">Close</button>
+    </div>
+    <div class="player__stage"></div>
+    <div class="player__info">
+      <h2 class="player__title" id="player-title"></h2>
+      <p class="label player__meta"></p>
+      <p class="player__context"></p>
+    </div>
+  </dialog>
+</body>
+</html>
