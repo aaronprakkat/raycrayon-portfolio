@@ -101,7 +101,10 @@
     });
   });
 
-  /* Buttons, nav links and the email link fill with the next accent */
+  /* Accent cycling: each hover/focus takes the next crayon-box colour.
+     .js-fill fills the element's background (buttons, nav links, email); .js-accent only sets --fill for CSS to use. */
+
+  const ACCENT_TARGETS = '.js-fill, .js-accent';
 
   function fill(node) {
     const accent = nextAccent();
@@ -110,11 +113,11 @@
   }
 
   document.addEventListener('pointerover', (e) => {
-    const target = e.target.closest('.js-fill');
+    const target = e.target.closest(ACCENT_TARGETS);
     if (target && !target.contains(e.relatedTarget)) fill(target);
   });
   document.addEventListener('focusin', (e) => {
-    const target = e.target.closest('.js-fill');
+    const target = e.target.closest(ACCENT_TARGETS);
     if (target) fill(target);
   });
 

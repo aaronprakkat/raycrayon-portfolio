@@ -129,19 +129,40 @@ button { font: inherit; color: inherit; }
   gap: 8px;
   height: var(--nav-h);
 }
+.nav__brand {
+  --logo-h: 30px;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+/* The mark is the SVG used as a mask, so its colour is just background-color. */
+.nav__logo {
+  width: calc(var(--logo-h) * 1526 / 998);
+  height: var(--logo-h);
+  background-color: currentColor;
+  -webkit-mask: url("../media/logo/raycrayon-mark.svg") center / contain no-repeat;
+          mask: url("../media/logo/raycrayon-mark.svg") center / contain no-repeat;
+  transition: background-color .25s var(--ease);
+}
+@media (hover: hover) {
+  .nav__brand:hover .nav__logo { background-color: var(--fill); }
+}
+.nav__brand:focus-visible .nav__logo { background-color: var(--fill); }
 .nav__mark {
   font: 400 28px/1 var(--display);
   letter-spacing: .02em;
   text-transform: uppercase;
-  text-decoration: none;
   padding-top: 3px;
 }
 .nav__links { display: flex; gap: 2px; margin-right: -12px; }
 
 @media (max-width: 400px) {
-  .nav__mark { font-size: 24px; }
-  .nav .pill--quiet { padding: 0 9px; }
-  .nav__links { margin-right: -9px; }
+  .nav__brand { --logo-h: 22px; gap: 6px; }
+  .nav__mark { font-size: 22px; }
+  .nav .pill--quiet { padding: 0 7px; }
+  .nav__links { gap: 0; margin-right: -7px; }
 }
 
 /* Hero: a comic-page column of CSS-textured panels behind the wordmark.
