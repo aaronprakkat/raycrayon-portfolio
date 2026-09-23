@@ -121,19 +121,6 @@
     if (target) fill(target);
   });
 
-  /* Hero name: each letter lights up in an accent, then fades back */
-
-  document.querySelectorAll('.hero__name span').forEach((letter) => {
-    letter.addEventListener('pointerenter', () => {
-      clearTimeout(letter.fadeTimer);
-      letter.style.setProperty('--lit', nextAccent());
-      letter.classList.add('is-lit');
-    });
-    letter.addEventListener('pointerleave', () => {
-      letter.fadeTimer = setTimeout(() => letter.classList.remove('is-lit'), 150);
-    });
-  });
-
   /* Hero model: no auto-rotate under reduced motion */
 
   const heroModel = document.querySelector('.hero__model');
@@ -146,7 +133,7 @@
   /* Hero model pops out of the bottom comic panel: hover on mouse, tap on touch, Enter/Space on keyboard */
 
   const heroStage = document.querySelector('.hero__stage');
-  const heroPanel = heroStage && heroStage.querySelector('.comic-panel--5');
+  const heroPanel = heroStage && heroStage.querySelector('.comic-panel--6');
   if (heroPanel && heroModel) {
     const rise = (on) => heroStage.classList.toggle('is-risen', on);
     const risen = () => heroStage.classList.contains('is-risen');
