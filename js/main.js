@@ -227,9 +227,96 @@
     player.showModal();
   }
 
+  /* Felines board: the card's image morphs into the board's main render */
+
+  const board = document.getElementById('board');
+  const boardRender = board.querySelector('.board__render');
+  let boardCard = null;
+
+  const morph = (update) => {
+    if (!document.startViewTransition || reduceMotion.matches) {
+      update();
+      return Promise.resolve();
+    }
+    return document.startViewTransition(update).finished;
+  };
+
+  function fillBoard(p) {
+    const b = p.board;
+    const field = (sel, show) => { board.querySelector(sel).hidden = !show; };
+    setAccent(board, p.accent);
+
+    const title = board.querySelector('.board__title');
+    title.replaceChildren(p.title, ' ', h('span', {}, p.meta));
+
+    const img = boardRender.querySelector('img');
+    img.src = b.render || p.poster || p.still;
+    img.alt = b.renderAlt || p.alt;
+
+    board.querySelector('.swatches').replaceChildren(...b.palette.map((hex) => {
+      const swatch = h('span', { 'aria-hidden': 'true' });
+      swatch.style.background = hex;
+      return h('li', {}, [swatch, h('code', {}, hex)]);
+    }));
+
+    field('.board__style', b.style);
+    board.querySelector('.board__style p').textContent = b.style || '';
+
+    field('.board__elements', b.elements && b.elements.length);
+    board.querySelector('.board__tags').replaceChildren(...(b.elements || []).map((t) => h('li', {}, t)));
+
+    field('.board__note', b.caption || b.note);
+    field('.board__caption', b.caption);
+    board.querySelector('.board__caption p').textContent = b.caption || '';
+    field('.board__observation', b.note);
+    board.querySelector('.board__observation').textContent = b.note || '';
+  }
+
+  function openBoard(card, p) {
+    boardCard = card;
+    stopLoop(card);
+    const media = card.querySelector('.card__media');
+    media.style.viewTransitionName = 'feline-render';
+    morph(() => {
+      media.style.viewTransitionName = '';
+      fillBoard(p);
+      boardRender.style.viewTransitionName = 'feline-render';
+      document.documentElement.classList.add('is-locked');
+      board.showModal();
+      board.scrollTop = 0;
+    }).finally(() => { boardRender.style.viewTransitionName = ''; });
+  }
+
+  function closeBoard() {
+    if (!board.open) return;
+    const media = boardCard && boardCard.querySelector('.card__media');
+    boardRender.style.viewTransitionName = 'feline-render';
+    morph(() => {
+      boardRender.style.viewTransitionName = '';
+      if (media) media.style.viewTransitionName = 'feline-render';
+      board.close();
+    }).finally(() => { if (media) media.style.viewTransitionName = ''; });
+  }
+
+  board.querySelector('.board__close').addEventListener('click', closeBoard);
+  board.addEventListener('cancel', (e) => {
+    e.preventDefault();
+    closeBoard();
+  });
+  board.addEventListener('click', (e) => {
+    if (!e.target.closest('.board__sheet > *, .board__close')) closeBoard();
+  });
+  board.addEventListener('close', () => {
+    document.documentElement.classList.remove('is-locked');
+    if (boardCard) boardCard.focus();
+  });
+
   document.addEventListener('click', (e) => {
     const card = e.target.closest('.card[data-slug]');
-    if (card) openPlayer(card);
+    if (!card) return;
+    const p = PROJECTS.find((x) => x.slug === card.dataset.slug);
+    if (p && p.board) openBoard(card, p);
+    else openPlayer(card);
   });
 
   player.querySelector('.player__close').addEventListener('click', () => player.close());

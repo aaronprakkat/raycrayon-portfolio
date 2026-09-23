@@ -216,6 +216,37 @@
     </div>
   </footer>
 
+  <dialog class="board" id="board" aria-labelledby="board-title">
+    <button class="pill board__close js-fill" type="button">Close</button>
+    <article class="board__sheet">
+      <h2 class="board__title" id="board-title"></h2>
+      <figure class="board__render"><img alt=""></figure>
+      <section class="board__card board__palette" aria-labelledby="board-palette">
+        <h3 class="label" id="board-palette">Palette</h3>
+        <ul class="swatches"></ul>
+      </section>
+      <section class="board__card board__style" aria-labelledby="board-style">
+        <h3 class="label" id="board-style">Style</h3>
+        <p></p>
+      </section>
+      <section class="board__card board__font" aria-labelledby="board-font">
+        <h3 class="label" id="board-font">Font</h3>
+        <p>Bold condensed all-caps display type, stamped top and bottom of the frame.</p>
+      </section>
+      <section class="board__card board__elements" aria-labelledby="board-elements">
+        <h3 class="label" id="board-elements">Elements used</h3>
+        <ul class="board__tags"></ul>
+      </section>
+      <section class="board__note" aria-labelledby="board-explanation">
+        <div class="board__paper">
+          <h3 class="label" id="board-explanation">Explanation</h3>
+          <blockquote class="board__caption"><p></p></blockquote>
+          <p class="board__observation"></p>
+        </div>
+      </section>
+    </article>
+  </dialog>
+
   <dialog class="player" id="player" aria-labelledby="player-title">
     <div class="player__bar">
       <button class="pill player__close js-fill" type="button">Close</button>
