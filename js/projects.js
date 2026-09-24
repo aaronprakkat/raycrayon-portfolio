@@ -132,10 +132,6 @@ const PROJECTS = [
     film: '', year: '', role: 'Projection mapping artist', context: 'Bear colour study. Season One Inc.', tile: 'bear',
   },
   {
-    slug: 'mystery-shack', group: 'mystery-shack', title: 'Mystery Shack', meta: 'Tribute', accent: '#FF5C2B', ratio: '16 / 9',
-    film: '', year: '', role: '', context: 'A tribute to Gravity Falls.',
-  },
-  {
     slug: 'personal-0200', group: 'personal', title: '0200', meta: 'Personal', accent: '#B8577F', ratio: '16 / 9',
     loop: 'media/loops/personal-0200.mp4', poster: 'media/posters/personal-0200.jpg',
     alt: '0200: a small golden snail robot on a hill of orange grass at dusk',
@@ -149,7 +145,15 @@ const PROJECTS = [
   },
   {
     slug: 'personal-render-house', group: 'personal', title: 'Render House', meta: 'Personal', accent: '#7A5CFF', ratio: '16 / 9',
+    still: 'media/stills/personal-render-house.webp',
+    alt: 'Render House: a grey clay render of a tiered, lattice-roofed house among tall grass at night',
     film: '', year: '', role: '', context: '',
+  },
+  {
+    slug: 'mystery-shack', group: 'personal', title: 'Mystery Shack', meta: 'Tribute', accent: '#FF5C2B', ratio: '16 / 9',
+    loop: 'media/loops/mystery-shack.mp4', poster: 'media/posters/mystery-shack.jpg',
+    alt: 'Mystery Shack: the Gravity Falls shack in saturated reds and violets, with a glowing Bill Cipher on the roof',
+    film: '', year: '', role: '', context: 'A tribute to Gravity Falls.',
   },
   {
     slug: 'asterisk', group: 'client', title: 'ASTERISK', meta: '2026', accent: '#3154FF', ratio: '4 / 5',

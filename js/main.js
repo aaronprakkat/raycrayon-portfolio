@@ -196,6 +196,57 @@
     heroWord.addEventListener('click', (e) => { if (e.detail === 0 || lastPointer !== 'mouse') next(); });
   }
 
+  /* Experience roadmap: each entry lights its node and the segment leading to it, once, as it scrolls in.
+     Accents follow the crayon-box order top to bottom. Reduced motion: everything is lit from the start. */
+
+  const roadmap = document.querySelector('.roadmap');
+  if (roadmap) {
+    const track = roadmap.querySelector('.roadmap__track');
+    const parts = [...roadmap.querySelectorAll('.xp li')].map((li, i) => {
+      const seg = h('span', { class: 'roadmap__seg' });
+      const node = h('span', { class: 'roadmap__node' });
+      seg.style.setProperty('--node', PALETTE[i % PALETTE.length]);
+      node.style.setProperty('--node', PALETTE[i % PALETTE.length]);
+      track.append(seg, node);
+      return { li, seg, node, title: li.querySelector('.xp__role') };
+    });
+
+    // Offsets ignore the entries' reveal translate, so nodes sit where titles end up, not where they start.
+    const offsetWithin = (el) => {
+      let y = 0;
+      for (let n = el; n && n !== roadmap; n = n.offsetParent) y += n.offsetTop;
+      return y;
+    };
+    const layout = () => {
+      let prev = 0;
+      for (const p of parts) {
+        const y = offsetWithin(p.title) + p.title.offsetHeight / 2;
+        p.node.style.top = `${y}px`;
+        p.seg.style.top = `${prev}px`;
+        p.seg.style.height = `${y - prev}px`;
+        prev = y;
+      }
+    };
+    layout();
+    new ResizeObserver(layout).observe(roadmap);
+    document.fonts.ready.then(layout);
+
+    const light = (p) => [p.li, p.seg, p.node].forEach((el) => el.classList.add('is-lit'));
+    if (reduceMotion.matches || !('IntersectionObserver' in window)) {
+      parts.forEach(light);
+    } else {
+      roadmap.classList.add('is-armed');
+      const io = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          light(parts.find((p) => p.li === entry.target));
+          io.unobserve(entry.target);
+        }
+      }, { rootMargin: '0px 0px -18% 0px', threshold: 0.25 });
+      parts.forEach((p) => io.observe(p.li));
+    }
+  }
+
   /* Selected work: the model turns slowly in its spotlight window, except under reduced motion */
 
   const spotModel = document.querySelector('.spotlight__model');

@@ -353,23 +353,6 @@ button { font: inherit; color: inherit; }
   text-transform: uppercase;
 }
 
-.project {
-  display: grid;
-  gap: 28px 64px;
-}
-.project__info {
-  display: grid;
-  gap: 14px;
-  align-content: center;
-}
-.project__info p:not(.label) { max-width: 44ch; }
-@media (min-width: 900px) {
-  .project { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); align-items: center; }
-  .project--tall { grid-template-columns: minmax(0, 1fr) minmax(0, 400px); }
-  .project--flip .project__cards { order: -1; }
-  .project--flip { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
-}
-
 .grid {
   display: grid;
   gap: clamp(16px, 2vw, 28px);
@@ -904,6 +887,59 @@ button { font: inherit; color: inherit; }
   .xp__years { padding-top: 4px; }
 }
 
+/* Roadmap: one hairline runs down through Experience and Education. main.js places a node level with each
+   entry's title and a segment from the previous node; both light up in turn (.is-lit) as entries scroll in. */
+.roadmap {
+  --rail: 7px;
+  position: relative;
+  padding-left: 32px;
+}
+.roadmap__track {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(var(--rail) * 2);
+  pointer-events: none;
+}
+.roadmap__track::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--rail) - .5px);
+  width: 1px;
+  background: var(--line);
+}
+.roadmap__seg {
+  position: absolute;
+  left: calc(var(--rail) - 1px);
+  width: 2px;
+  background: var(--node, transparent);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform .7s var(--ease);
+}
+.roadmap__node {
+  position: absolute;
+  left: 0;
+  width: calc(var(--rail) * 2);
+  height: calc(var(--rail) * 2);
+  translate: 0 -50%;
+  border: 1px solid rgba(17, 17, 17, .28);
+  border-radius: 50%;
+  background: var(--bg);
+  transition: background-color .4s var(--ease) .45s, border-color .4s var(--ease) .45s;
+}
+.roadmap__seg.is-lit { transform: none; }
+.roadmap__node.is-lit { background: var(--node); border-color: var(--node); }
+.roadmap.is-armed .xp li {
+  opacity: 0;
+  translate: 0 14px;
+  transition: opacity .6s var(--ease), translate .6s var(--ease);
+}
+.roadmap.is-armed .xp li.is-lit { opacity: 1; translate: 0 0; }
+
 /* About */
 .about {
   display: grid;
@@ -922,9 +958,34 @@ button { font: inherit; color: inherit; }
   font: 500 12px/1.2 var(--sans);
   letter-spacing: .1em;
   text-transform: uppercase;
+  transition: background-color .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
 }
+/* Empty until the processed headshot arrives; the 4:5 box holds the layout so the <img> drops straight in. */
+.about__photo {
+  grid-area: photo;
+  width: min(100%, 320px);
+  aspect-ratio: 4 / 5;
+  border: 1px solid var(--line);
+  background: #EFEDE6;
+  overflow: hidden;
+}
+.about__photo img { width: 100%; height: 100%; object-fit: cover; }
+.about { grid-template-areas: "photo" "bio" "lists"; }
+.about__bio { grid-area: bio; }
+.about__lists { grid-area: lists; }
 @media (min-width: 900px) {
-  .about { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+  .about {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    grid-template-areas: "bio photo" "bio lists";
+  }
+  .about__photo { width: 100%; max-width: 320px; }
+}
+@media (min-width: 1100px) {
+  .about {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 280px);
+    grid-template-areas: "bio lists photo";
+    gap: 40px 56px;
+  }
 }
 
 /* Contact */
