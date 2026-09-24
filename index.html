@@ -103,6 +103,7 @@
       </section>
 
       <section class="band gumizoo" id="gumizoo" aria-labelledby="gumizoo-title">
+        <div class="gumizoo__flood" aria-hidden="true"><div class="gumi-frags gumi-frags--preview"></div></div>
         <div class="wrap gumizoo__grid">
           <div class="gumizoo__intro">
             <p class="label">Character collection</p>
@@ -286,10 +287,17 @@
 
   <dialog class="board gumi-panel" id="gumi-panel" aria-labelledby="gumi-panel-name">
     <button class="pill board__close js-fill" type="button">Close</button>
+    <div class="gumi-frags gumi-frags--panel" aria-hidden="true"></div>
     <article class="gumi-panel__sheet">
       <figure class="gumi-panel__portrait"><img alt="" width="1280" height="960"></figure>
       <h2 class="gumi-panel__stamp" id="gumi-panel-name"></h2>
       <p class="gumi-panel__trait"></p>
+      <section class="gumi-panel__bio" aria-labelledby="gumi-panel-bio">
+        <div class="board__paper">
+          <h3 class="label" id="gumi-panel-bio">Bio</h3>
+          <p></p>
+        </div>
+      </section>
       <div class="gumi-panel__more"></div>
     </article>
   </dialog>

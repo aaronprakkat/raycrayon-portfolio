@@ -348,26 +348,66 @@
     const bySlug = (slug) => GUMIZOO.characters.find((c) => c.slug === slug);
     const srcset = (c) => `media/stills/gumizoo-${c.slug}-640.webp 640w, media/stills/gumizoo-${c.slug}.webp 1280w`;
 
+    const previewFrags = gumizoo.querySelector('.gumi-frags--preview');
+    const panelFrags = gumiPanel.querySelector('.gumi-frags--panel');
+    const more = gumiPanel.querySelector('.gumi-panel__more');
+    let lastPointer = 'mouse';
+    document.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType; }, true);
+
+    // A fragment is either a real cut-out ({ src }) or a placeholder crop of the portrait ({ at, zoom, shape }).
+    // url() inside a custom property resolves against the stylesheet, so hand CSS absolute URLs.
+    const cssUrl = (path) => `url("${new URL(path, document.baseURI).href}")`;
+    const fragment = (c, f) => {
+      const el = h('span', { class: 'gumi-frag', 'data-shape': f.src ? null : f.shape });
+      if (f.src) {
+        el.style.setProperty('--frag-img', cssUrl(f.src));
+        return el;
+      }
+      const zx = f.zoom;
+      const zy = f.zoom * 0.75;
+      const pos = (v, z) => `${((v - 1 / (2 * z)) / (1 - 1 / z)) * 100}%`;
+      el.style.setProperty('--frag-img', cssUrl(`media/stills/gumizoo-${c.slug}-640.webp`));
+      el.style.setProperty('--frag-size', `${zx * 100}% auto`);
+      el.style.setProperty('--frag-pos', `${pos(f.at[0], zx)} ${pos(f.at[1], zy)}`);
+      return el;
+    };
+    const scatter = (container, c, count) => {
+      const list = c.fragments || [];
+      container.replaceChildren(...Array.from({ length: list.length ? count : 0 }, (_, i) => fragment(c, list[i % list.length])));
+    };
+
     const posterLayer = h('div', { class: 'gumizoo__layer gumizoo__layer--poster is-active' },
       h('img', { src: GUMIZOO.poster.src, alt: GUMIZOO.poster.alt, loading: 'lazy', decoding: 'async' }));
     layers.append(posterLayer);
 
     for (const c of GUMIZOO.characters) {
       const layer = h('div', { class: 'gumizoo__layer', 'aria-hidden': 'true' }, h('img', {
-        src: `media/stills/gumizoo-${c.slug}-640.webp`, srcset: srcset(c), sizes: '(min-width: 900px) 400px, 100vw',
+        src: `media/stills/gumizoo-${c.slug}-640.webp`, srcset: srcset(c), sizes: '(min-width: 900px) 460px, 100vw',
         alt: c.alt, loading: 'lazy', decoding: 'async',
       }));
+      if (c.video) {
+        layer.append(h('video', {
+          muted: true, playsinline: true, loop: true, preload: 'none',
+          poster: c.video.poster, src: c.video.src, 'aria-hidden': 'true', tabindex: '-1',
+        }));
+      }
       layer.style.setProperty('--layer-bg', c.bg);
       layers.append(layer);
       layerFor[c.slug] = layer;
 
+      const chip = h('span', { class: 'gumizoo__chip', 'aria-hidden': 'true' },
+        h('img', { src: `media/stills/gumizoo-${c.slug}-chip.webp`, alt: '', width: '56', height: '56', loading: 'lazy' }));
+      if (c.video) {
+        chip.insertAdjacentHTML('beforeend',
+          '<svg class="gumizoo__play" viewBox="0 0 22 22" focusable="false"><circle cx="11" cy="11" r="10"/><path d="M9 7.2v7.6l6-3.8z"/></svg>');
+      }
       const row = h('button', {
         type: 'button', class: 'gumizoo__row', 'data-slug': c.slug, 'aria-haspopup': 'dialog',
-        'aria-label': `${c.name} ${c.surname}: ${c.trait}`,
+        'aria-label': `${c.name} ${c.surname}: ${c.trait}${c.video ? ` Includes the video ${c.video.title}.` : ''}`,
       }, [
-        h('span', { class: 'gumizoo__chip', 'aria-hidden': 'true' },
-          h('img', { src: `media/stills/gumizoo-${c.slug}-chip.webp`, alt: '', width: '56', height: '56', loading: 'lazy' })),
+        chip,
         h('span', { class: 'gumizoo__row-name' }, [c.name, ' ', h('span', { class: 'gumizoo__row-surname' }, c.surname)]),
+        h('span', { class: 'gumizoo__row-trait', 'aria-hidden': 'true' }, c.trait),
       ]);
       setAccent(row, c.accent);
       list.append(h('li', {}, row));
@@ -378,29 +418,42 @@
       const active = c ? layerFor[c.slug] : posterLayer;
       for (const layer of layers.children) {
         const on = layer === active;
+        if (!on) stopLoop(layer);
         layer.classList.toggle('is-active', on);
         if (on) layer.removeAttribute('aria-hidden');
         else layer.setAttribute('aria-hidden', 'true');
       }
       display.classList.toggle('is-previewing', Boolean(c));
-      if (c) {
+      gumizoo.classList.toggle('is-flooded', Boolean(c));
+      if (c && c !== shown) {
         setAccent(caption, c.accent);
         caption.querySelector('.gumizoo__caption-name').textContent = `${c.name} ${c.surname}`;
         caption.querySelector('.gumizoo__caption-trait').textContent = c.trait;
+        gumizoo.style.setProperty('--flood', c.accent);
+        gumizoo.style.setProperty('--on-flood', onColor(c.accent));
+        scatter(previewFrags, c, 4);
       }
       shown = c;
+    };
+    // Only Nanju has a video: it plays in the display while his row is hovered or keyboard-focused.
+    const preview = (c) => {
+      show(c);
+      if (c && c.video) playLoop(layerFor[c.slug]);
     };
 
     list.addEventListener('pointerover', (e) => {
       const row = e.target.closest('.gumizoo__row');
-      if (row && e.pointerType === 'mouse') show(bySlug(row.dataset.slug));
+      if (row && e.pointerType === 'mouse') preview(bySlug(row.dataset.slug));
     });
     list.addEventListener('pointerleave', (e) => {
       if (e.pointerType === 'mouse' && !list.contains(document.activeElement)) show(null);
     });
     list.addEventListener('focusin', (e) => {
       const row = e.target.closest('.gumizoo__row');
-      if (row) show(bySlug(row.dataset.slug));
+      if (!row) return;
+      const c = bySlug(row.dataset.slug);
+      if (lastPointer === 'mouse') preview(c);
+      else show(c);
     });
     list.addEventListener('focusout', (e) => {
       if (!list.contains(e.relatedTarget) && !gumiPanel.open) show(null);
@@ -417,9 +470,11 @@
       const c = bySlug(row.dataset.slug);
       gumiRow = row;
       gumiSource = shown === c && inView(display) ? layerFor[c.slug] : row.querySelector('.gumizoo__chip');
+      stopLoop(layerFor[c.slug]);
       gumiSource.style.viewTransitionName = 'gumi-portrait';
       morph(() => {
         gumiSource.style.viewTransitionName = '';
+        show(c);
         setAccent(gumiPanel, c.accent);
         portraitImg.src = `media/stills/gumizoo-${c.slug}.webp`;
         portraitImg.srcset = srcset(c);
@@ -427,6 +482,17 @@
         portraitImg.alt = c.alt;
         gumiPanel.querySelector('.gumi-panel__stamp').textContent = `${c.name} ${c.surname}`;
         gumiPanel.querySelector('.gumi-panel__trait').textContent = c.trait;
+        gumiPanel.querySelector('.gumi-panel__bio p').textContent = c.bio;
+        scatter(panelFrags, c, 8);
+        more.replaceChildren();
+        if (c.video) {
+          const video = h('video', {
+            src: c.video.src, poster: c.video.poster, muted: true, loop: true, playsinline: true, controls: true,
+            autoplay: !reduceMotion.matches, 'aria-label': c.video.label,
+          });
+          video.muted = true;
+          more.append(video);
+        }
         portrait.style.viewTransitionName = 'gumi-portrait';
         document.documentElement.classList.add('is-locked');
         gumiPanel.showModal();
@@ -453,6 +519,7 @@
       if (!e.target.closest('.gumi-panel__sheet > *, .board__close')) closeGumi();
     });
     gumiPanel.addEventListener('close', () => {
+      more.replaceChildren();
       document.documentElement.classList.remove('is-locked');
       if (gumiRow) gumiRow.focus();
     });

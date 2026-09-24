@@ -165,6 +165,11 @@ button { font: inherit; color: inherit; }
   .nav .pill--quiet { padding: 0 7px; }
   .nav__links { gap: 0; margin-right: -7px; }
 }
+/* 360px phones with a visible scrollbar leave ~345px: tighten further so the lockup and links still fit. */
+@media (max-width: 380px) {
+  .nav .pill--quiet { padding: 0 5px; letter-spacing: .06em; }
+  .nav__links { margin-right: -5px; }
+}
 
 /* Hero: a comic-page column of duotoned stills from Ryan's work behind the wordmark.
    The model rests in the bottom panel and pops out in front of the name (.is-risen). */
@@ -179,6 +184,8 @@ button { font: inherit; color: inherit; }
   --pop: .55s cubic-bezier(.2, .9, .25, 1.15);
   position: relative;
   isolation: isolate;
+  /* Sizes inside the hero use cqi (this box's width) rather than vw, which counts the scrollbar and overflowed. */
+  container-type: inline-size;
   display: grid;
   grid-template-rows: minmax(0, .6fr) minmax(0, .9fr) minmax(0, .5fr) minmax(0, .65fr) minmax(0, .75fr) minmax(0, 3.2fr);
   gap: var(--gap);
@@ -290,7 +297,7 @@ button { font: inherit; color: inherit; }
   grid-area: 4 / 1 / 6 / 2;
   align-self: end;
   translate: 0 30%;
-  font: 400 min(calc((100vw - 2 * var(--gutter)) / 3.95), calc(var(--max) / 3.95))/.82 var(--display);
+  font: 400 min(calc(100cqi / 3.95), calc(var(--max) / 3.95))/.82 var(--display);
   letter-spacing: .01em;
   text-align: center;
   text-transform: uppercase;
@@ -315,7 +322,7 @@ button { font: inherit; color: inherit; }
   left: 50%;
   bottom: 4px;
   z-index: 1;
-  --size: min(calc(var(--big-panel) * 1.3), calc(100vw - 2 * var(--gutter) - 8px));
+  --size: min(calc(var(--big-panel) * 1.3), calc(100cqi - 8px));
   width: var(--size);
   height: var(--size);
   translate: -50% 0;
@@ -521,10 +528,83 @@ button { font: inherit; color: inherit; }
 .card:focus-visible .card__label { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .card:focus-visible .card__meta { color: inherit; }
 
-/* Gumizoo: display window + roster. Hovering a row crossfades the display to that character. */
+/* Gumizoo: display window + roster. Hovering/focusing (or tapping) a row crossfades the display to that
+   character and floods the section's surrounding space with its accent (.is-flooded). */
+.gumizoo {
+  position: relative;
+  isolation: isolate;
+  transition: color .4s var(--ease);
+}
+.gumizoo__flood {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  background-color: var(--flood, transparent);
+  background-image:
+    radial-gradient(110% 80% at 15% 0%, color-mix(in oklab, var(--flood, #FAF8F2), white 26%), transparent 60%),
+    radial-gradient(90% 70% at 100% 100%, color-mix(in oklab, var(--flood, #FAF8F2), black 20%), transparent 65%);
+  transition: opacity .5s var(--ease), background-color .4s var(--ease);
+}
+.gumizoo__flood::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--grain);
+  opacity: .38;
+  mix-blend-mode: soft-light;
+}
+.gumizoo.is-flooded .gumizoo__flood { opacity: 1; }
+.gumizoo.is-flooded {
+  --fg: var(--on-flood);
+  --muted: var(--on-flood);
+  --line: color-mix(in srgb, var(--on-flood) 28%, transparent);
+  color: var(--on-flood);
+}
+
+/* Fragments: small motifs scattered on the flood and the detail panel. Slots (below) set position and size;
+   the data only says which image and crop fills each one, so real PNG cut-outs can replace the crops. */
+.gumi-frags {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.gumi-frag {
+  position: absolute;
+  width: var(--s, 72px);
+  aspect-ratio: 1;
+  opacity: .6;
+  rotate: var(--r, 0deg);
+  background: var(--frag-img) var(--frag-pos, center) / var(--frag-size, contain) no-repeat;
+}
+.gumi-frag[data-shape="circle"] { clip-path: circle(46%); }
+.gumi-frag[data-shape="star"] {
+  clip-path: polygon(50% 0, 61% 32%, 95% 22%, 71% 50%, 95% 78%, 61% 68%, 50% 100%, 39% 68%, 5% 78%, 29% 50%, 5% 22%, 39% 32%);
+}
+.gumi-frag[data-shape="tooth"] { clip-path: polygon(8% 12%, 92% 12%, 50% 96%); }
+
+.gumi-frags--preview .gumi-frag:nth-child(1) { top: 3%;  left: 34%;  --s: 64px; --r: -14deg; }
+.gumi-frags--preview .gumi-frag:nth-child(2) { top: 1%;  right: 4%;  --s: 84px; --r: 10deg; }
+.gumi-frags--preview .gumi-frag:nth-child(3) { bottom: 2%; left: 6%;  --s: 72px; --r: 18deg; }
+.gumi-frags--preview .gumi-frag:nth-child(4) { bottom: 3%; right: 36%; --s: 56px; --r: -8deg; }
+
+.gumi-frags--panel { position: fixed; }
+.gumi-frags--panel .gumi-frag { opacity: .7; }
+.gumi-frags--panel .gumi-frag:nth-child(1) { top: 6%;  left: 4%;   --s: 150px; --r: -12deg; }
+.gumi-frags--panel .gumi-frag:nth-child(2) { top: 3%;  left: 44%;  --s: 96px;  --r: 16deg; }
+.gumi-frags--panel .gumi-frag:nth-child(3) { top: 14%; right: 12%; --s: 132px; --r: -6deg; }
+.gumi-frags--panel .gumi-frag:nth-child(4) { top: 46%; left: 1%;   --s: 110px; --r: 22deg; }
+.gumi-frags--panel .gumi-frag:nth-child(5) { top: 52%; right: 2%;  --s: 150px; --r: 9deg; }
+.gumi-frags--panel .gumi-frag:nth-child(6) { bottom: 4%; left: 18%; --s: 128px; --r: -18deg; }
+.gumi-frags--panel .gumi-frag:nth-child(7) { bottom: 8%; left: 52%; --s: 92px;  --r: 12deg; }
+.gumi-frags--panel .gumi-frag:nth-child(8) { bottom: 2%; right: 16%; --s: 118px; --r: -10deg; }
+
 .gumizoo__grid {
   display: grid;
-  gap: 28px 64px;
+  gap: 28px 40px;
   grid-template-areas: "intro" "display" "roster";
 }
 .gumizoo__intro {
@@ -556,12 +636,20 @@ button { font: inherit; color: inherit; }
   transition: opacity .45s var(--ease);
 }
 .gumizoo__layer.is-active { opacity: 1; }
-.gumizoo__layer img {
+.gumizoo__layer img,
+.gumizoo__layer video {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 .gumizoo__layer--poster img { object-fit: cover; }
+.gumizoo__layer video {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity .35s var(--ease);
+}
+.gumizoo__layer.is-playing video { opacity: 1; }
 
 .gumizoo__caption {
   position: absolute;
@@ -629,6 +717,7 @@ button { font: inherit; color: inherit; }
 }
 .gumizoo__row:focus-visible { background-color: color-mix(in oklab, var(--accent) 14%, transparent); outline-offset: -2px; }
 .gumizoo__chip {
+  position: relative;
   flex: none;
   width: 56px;
   height: 56px;
@@ -636,17 +725,52 @@ button { font: inherit; color: inherit; }
   background: var(--accent);
 }
 .gumizoo__chip img { width: 100%; height: 100%; object-fit: cover; }
+.gumizoo__play {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 22px;
+  height: 22px;
+  fill: #FAF8F2;
+  stroke: #111111;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
 .gumizoo__row-name {
+  flex: 1;
   font: 400 clamp(26px, 2.6vw, 34px)/1 var(--display);
   letter-spacing: .01em;
   text-transform: uppercase;
   padding-top: 3px;
 }
 .gumizoo__row-surname { color: var(--accent); }
+.gumizoo__row-trait {
+  font: 500 12px/1.3 var(--sans);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: right;
+}
+@media (max-width: 480px) {
+  .gumizoo__row-trait { display: none; }
+}
+
+/* On the flood, rows sit on paper so names, accent surnames and traits stay legible on any accent. */
+.gumizoo.is-flooded .gumizoo__list { border-top-color: transparent; }
+.gumizoo.is-flooded .gumizoo__row {
+  --muted: #5E5E5E;
+  color: #111111;
+  background-color: #FAF8F2;
+  border-bottom-color: rgba(17, 17, 17, .12);
+}
+.gumizoo.is-flooded .gumizoo__row:is(:hover, :focus-visible) {
+  background-color: color-mix(in oklab, var(--accent) 16%, #FAF8F2);
+}
 
 @media (min-width: 900px) {
   .gumizoo__grid {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+    --display-w: min(460px, calc(min(80svh, 800px) * 9 / 16));
+    grid-template-columns: minmax(0, 1fr) var(--display-w);
     grid-template-areas: "intro display" "roster display";
     grid-template-rows: auto 1fr;
     align-items: start;
@@ -695,11 +819,11 @@ button { font: inherit; color: inherit; }
 }
 
 /* Contact */
-.contact .wrap { display: grid; gap: 28px; justify-items: start; }
+.contact .wrap { display: grid; gap: 28px; justify-items: start; container-type: inline-size; }
 .contact__email {
   margin-left: -.08em;
   padding: .08em .08em 0;
-  font: 400 min(calc((100vw - 2 * var(--gutter)) / 11.8), calc(var(--max) / 11.8))/.95 var(--display);
+  font: 400 min(calc(100cqi / 11.8), calc(var(--max) / 11.8))/.95 var(--display);
   text-transform: uppercase;
   text-decoration: none;
   transition: background-color .25s var(--ease), color .25s var(--ease);
@@ -934,6 +1058,7 @@ button { font: inherit; color: inherit; }
 /* Gumizoo detail panel: reuses .board's grainy accent background and close button */
 .gumi-panel__sheet {
   position: relative;
+  z-index: 1;
   display: grid;
   gap: 20px;
   width: 100%;
@@ -973,19 +1098,35 @@ button { font: inherit; color: inherit; }
   text-transform: uppercase;
   box-shadow: 0 6px 14px rgba(0, 0, 0, .16);
 }
+.gumi-panel__bio {
+  justify-self: start;
+  max-width: 440px;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .22));
+}
+.gumi-panel__bio p { font: 400 16px/1.5 var(--sans); }
 .gumi-panel__more:empty { display: none; }
+.gumi-panel__more video {
+  display: block;
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 16 / 9;
+  background: #111111;
+  border: 6px solid #FFFFFF;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 16px 32px rgba(0, 0, 0, .28);
+}
 
 @media (min-width: 900px) {
   .gumi-panel__sheet {
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-    grid-template-rows: 1fr auto auto 1fr;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    grid-template-rows: 1fr auto auto auto auto 1fr;
     column-gap: 56px;
     row-gap: 18px;
   }
-  .gumi-panel__portrait { grid-area: 1 / 1 / 5 / 2; align-self: center; width: 100%; transform: rotate(-3deg); }
+  .gumi-panel__portrait { grid-area: 1 / 1 / 7 / 2; align-self: center; width: 100%; transform: rotate(-3deg); }
   .gumi-panel__stamp { grid-area: 2 / 2; transform: rotate(-2deg); }
   .gumi-panel__trait { grid-area: 3 / 2; transform: rotate(1.5deg); }
-  .gumi-panel__more { grid-area: 5 / 1 / 6 / 3; }
+  .gumi-panel__bio { grid-area: 4 / 2; transform: rotate(1.2deg); }
+  .gumi-panel__more { grid-area: 5 / 2; transform: rotate(-1.5deg); }
 }
 
 ::view-transition-group(gumi-portrait) {

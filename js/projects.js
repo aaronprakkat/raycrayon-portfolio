@@ -142,6 +142,11 @@ const PROJECTS = [
 ];
 
 // accent is sampled from each character's body in its portrait; bg is the portrait's backdrop, used to fill the display window.
+// bio: PROPOSED COPY pending final approval, not sourced from Ryan (bioDraft: true). Replace once he approves or rewrites it.
+// fragments: small motifs scattered over the hover flood and the detail panel. These are PLACEHOLDERS cropped
+//   from the portrait ({ at: [x, y] centre as 0–1 fractions, zoom, shape }). To use a prepared transparent PNG
+//   instead, replace an entry with { src: 'media/stills/gumizoo-fragments/<file>.png' }. Positions live in CSS slots.
+// video: optional extra clip; it plays in the display on hover/focus and fills the panel's reserved slot.
 const GUMIZOO = {
   poster: {
     src: 'media/stills/gumizoo.webp',
@@ -151,18 +156,52 @@ const GUMIZOO = {
     {
       slug: 'ashik-rancher', name: 'Ashik', surname: 'Rancher', trait: 'Hard-headed.', accent: '#B72D03', bg: '#5F0C8C',
       alt: 'Ashik Rancher: a red-orange 3D gummy monkey head with jagged teeth and a scowl, on purple',
+      bio: 'Ashik is convinced he’s right about everything, mostly because he’s never once been wrong loud enough to notice. Named after ranch dressing — goes on everything, argues with nothing.',
+      bioDraft: true,
+      fragments: [
+        { at: [0.47, 0.55], zoom: 6, shape: 'tooth' },
+        { at: [0.1, 0.47], zoom: 5, shape: 'star' },
+        { at: [0.36, 0.39], zoom: 9, shape: 'circle' },
+      ],
     },
     {
       slug: 'gia-tangerine', name: 'Gia', surname: 'Tangerine', trait: 'Gluttonous.', accent: '#8C4079', bg: '#CF046B',
       alt: 'Gia Tangerine: a purple 3D gummy monkey head with teal hair and a long blue tongue, on magenta',
+      bio: 'Gia would eat the couch if you left it near the fridge long enough. Named after a tangerine because she’s sweet, a little sour, and gone in one bite.',
+      bioDraft: true,
+      fragments: [
+        { at: [0.46, 0.65], zoom: 5, shape: 'circle' },
+        { at: [0.16, 0.47], zoom: 5, shape: 'star' },
+        { at: [0.55, 0.45], zoom: 9, shape: 'circle' },
+      ],
     },
     {
       slug: 'nanju-jam', name: 'Nanju', surname: 'Jam', trait: 'Gambling-type stupid.', accent: '#9A8807', bg: '#F4B60C',
       alt: 'Nanju Jam: an olive-green 3D gummy monkey head with dripping hair and clenched teeth, on yellow',
+      bio: 'Nanju bets on things that were never a competition — staring contests with the microwave, mostly. Named after jam because he’s sticky, unpredictable, and somehow always all over the place.',
+      bioDraft: true,
+      fragments: [
+        { at: [0.49, 0.63], zoom: 6, shape: 'tooth' },
+        { at: [0.09, 0.46], zoom: 5, shape: 'star' },
+        { at: [0.49, 0.31], zoom: 10, shape: 'circle' },
+      ],
+      video: {
+        title: 'Breaking Gumi',
+        src: 'media/loops/gumizoo-nanju-breaking-gumi.mp4',
+        poster: 'media/posters/gumizoo-nanju-breaking-gumi.jpg',
+        label: 'Breaking Gumi: a Breaking Bad parody with Nanju Jam’s head on a man in a desert, holding a gun',
+      },
     },
     {
       slug: 'rana-ghee', name: 'Rana', surname: 'Ghee', trait: 'Boy-crazy.', accent: '#CF6C74', bg: '#1E4BC8',
       alt: 'Rana Ghee: a pink 3D gummy monkey head with purple hair, star eyes and a blue tongue, on blue',
+      bio: 'Rana falls in love roughly every eleven minutes, usually with someone who hasn’t noticed her yet. Named after ghee because she melts — fast, and often.',
+      bioDraft: true,
+      fragments: [
+        { at: [0.58, 0.47], zoom: 10, shape: 'star' },
+        { at: [0.49, 0.42], zoom: 10, shape: 'circle' },
+        { at: [0.5, 0.65], zoom: 6, shape: 'circle' },
+      ],
     },
   ],
 };
