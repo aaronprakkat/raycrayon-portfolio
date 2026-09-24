@@ -45,6 +45,9 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
 1. **Hero name:** RAYCRAYON's letters are a window onto a duotoned still of Ryan's work; hover, focus or press moves on to the next piece (see Page sections).
 2. **Buttons, nav links, tagline and tags:** fill with a different accent each time they are hovered or focused (cycle through the palette, one shared handler via `.js-fill` / `.js-accent`). The hero buttons use the grainy gradient version of the fill.
 3. **Project cards:** on hover the poster swaps to its muted loop and the title label fills with that project's accent. On touch devices, no hover: tap opens the player.
+   - **Multi-clip cards** (a `clips` list in `js/projects.js`): the card shows one active clip, clip 1 by default. Previous/Next arrow buttons and a "2 / 4" counter sit in a slim bar over the bottom of the media: revealed on hover/focus on desktop, always visible on touch.
+   - Arrows swap the active clip's poster and loop with a crossfade (instant under reduced motion), wrap at both ends, and never open anything. A polite live region announces "Clip 2 of 4: <label>".
+   - Clicking the card body opens the player on the active clip. Because buttons can't nest, the arrows are siblings of the card button inside a `.clip-card` wrapper. Cards with one clip get no arrows.
 4. **Felines strip:** a row of the Felines pieces. Hovering or focusing one changes the whole section background to that piece's color. Moving away returns to the base color.
 
 **Section behavior:** when the Pangeo section scrolls into view, the page background transitions to dark (lights dimming, like a projection room), and back to light when it leaves.
@@ -71,7 +74,7 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
    - Gumizoo (character roster + detail panels)
    - Pangeo (dark section, bento grid, projection mapping)
    - More personal work: 0200, BLR 2025, Render House (still), Mystery Shack (Gravity Falls tribute)
-4. **Client work:** ASTERISK, 70EMG, Funk House Media.
+4. **Client work:** ASTERISK (4 clips: video + 3 concept stills), 70EMG (4 clips), Funk House Media (3 clips). All use the multi-clip card pattern; still clips have no hover loop and open as an image in the player.
 5. **Experience:** from the CV below, as a vertical roadmap whose nodes light once, in crayon-box order, as entries scroll in.
 6. **About and tools:** short bio, skills, software (tags use the accent cycling), and the headshot `media/stills/about-headshot.jpg` (alt "Portrait of Ryan Abraham Thomas") in a 4:5 hairline frame, `object-fit: cover`. It sits right of the tags on desktop, above them on tablet, first on phones.
 7. **Contact:** large email link and Instagram. No phone number.
@@ -118,9 +121,11 @@ Accent colors for Felines were sampled by eye from Instagram. Adjust against the
 | personal-0200 | 0200 | Personal | TBD | File: 0200.mp4 |
 | personal-blr-2025 | BLR 2025 | Personal | TBD | File: final aniamtion blr 2025.mp4 |
 | personal-render-house | Render House | Personal | TBD | File: RENDER HOUSE3.png |
-| 70emg | 70EMG | Client | `#B8FF38` | File: animation_final.mp4 |
-| asterisk | ASTERISK | Client | `#3154FF` | 3D-printed footwear accessories. Waiting on files |
-| funk-house | Funk House Media | Client | `#26E1DD` | Video editing. Waiting on files |
+| 70emg | 70EMG | Client | `#B8FF38` | Clips: 1 `70emg-animation` (animation_final.mp4), 2 `70emg-nikhil-kamath`, 3 `70emg-generation-speed`, 4 `70emg-elf` |
+| asterisk | ASTERISK | Client | `#3154FF` | 3D-printed footwear accessories. Clips: 1 `asterisk-scene-3` (clip_scene3_white0001-0122.mp4), 2–4 concept stills `asterisk-concept-black`, `-cream`, `-white` (WebP) |
+| funk-house | Funk House Media | Client | `#26E1DD` | Video editing. Clips: 1 `funk-house-sling`, 2 `funk-house-manetain`, 3 `funk-house-iza-dawgs` |
+
+Client clip sources live in `Downloads\client works\` (asterisk, seventy, funkhouse medi) and are copied into `source/projects/clients/`. Each clip has `media/loops/<name>.mp4` and `media/posters/<name>.jpg`.
 
 Full-film links (YouTube/Vimeo): add here as they're uploaded.
 

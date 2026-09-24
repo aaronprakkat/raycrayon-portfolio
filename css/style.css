@@ -488,6 +488,75 @@ button { font: inherit; color: inherit; }
 }
 .card.is-playing .card__media video { opacity: 1; }
 
+/* Multi-clip cards: arrows and counter sit in a slim bar over the bottom of the media, just above the label. */
+.card__ghost {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity .4s var(--ease);
+}
+.card__ghost.is-leaving { opacity: 0; }
+.clip-card { position: relative; }
+.clip-nav {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: calc(var(--label-h, 43px) + 8px);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s var(--ease);
+}
+.clip-card:is(:hover, :focus-within) .clip-nav,
+.clip-nav:focus-within { opacity: 1; }
+@media (hover: none) {
+  .clip-nav { opacity: 1; }
+}
+.clip-nav__btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid rgba(17, 17, 17, .5);
+  border-radius: 50%;
+  background: rgba(250, 248, 242, .92);
+  color: #111111;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background-color .2s var(--ease), border-color .2s var(--ease);
+}
+.clip-nav__btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.clip-nav__btn:is(:hover, :focus-visible) { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.clip-nav__btn:focus-visible { outline: 2px solid #111111; outline-offset: 2px; }
+.clip-nav__count {
+  padding: 5px 9px 4px;
+  background: rgba(250, 248, 242, .92);
+  color: #111111;
+  font: 500 11px/1 var(--sans);
+  letter-spacing: .1em;
+  font-variant-numeric: tabular-nums;
+}
+@media (hover: hover) {
+  .clip-card:hover .card__label { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .clip-card:hover .card__meta { color: inherit; }
+}
+
 .card__media--block {
   display: grid;
   place-items: center;

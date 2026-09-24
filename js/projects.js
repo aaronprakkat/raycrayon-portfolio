@@ -1,4 +1,7 @@
 // film: YouTube or Vimeo URL once uploaded. Until then the player shows the hover loop.
+// clips: optional ordered list ({ label, loop, poster, alt } or { label, still, alt }) for multi-clip cards.
+//   Clip 1 is the default cover; with more than one, the card gets Previous/Next arrows and the player
+//   opens whichever clip is active. A clip's fields override the project's own.
 // year / role / context: empty strings are hidden on the page.
 // board (Felines): palette is sampled from the artwork; style, elements and caption come from
 // claude/03-project-tracker.md. caption is Ryan's own words; note is a plain visual observation.
@@ -158,16 +161,42 @@ const PROJECTS = [
   {
     slug: 'asterisk', group: 'client', title: 'ASTERISK', meta: '2026', accent: '#3154FF', ratio: '4 / 5',
     film: '', year: '2026', role: '3D artist', context: '3D-printed accessories for footwear: modelling, refinement and print feasibility.',
+    clips: [
+      { label: 'Scene 3', loop: 'media/loops/asterisk-scene-3.mp4', poster: 'media/posters/asterisk-scene-3.jpg',
+        alt: 'ASTERISK: a white 3D-printed shoe accessory turning slowly on black' },
+      { label: 'Concept, black', still: 'media/stills/asterisk-concept-black.webp',
+        alt: 'ASTERISK concept: a black leather sneaker with a mint-green and lilac sculpted 3D-printed accessory wrapped over the laces' },
+      { label: 'Concept, cream', still: 'media/stills/asterisk-concept-cream.webp',
+        alt: 'ASTERISK concept: a cream suede sneaker with a pink and yellow swirling 3D-printed accessory across the laces' },
+      { label: 'Concept, white', still: 'media/stills/asterisk-concept-white.webp',
+        alt: 'ASTERISK concept: a white and grey sneaker with a yellow and lime-green sculpted 3D-printed accessory at the laces' },
+    ],
   },
   {
     slug: '70emg', group: 'client', title: '70EMG', meta: '2025', accent: '#B8FF38', ratio: '4 / 5',
-    loop: 'media/loops/70emg-animation.mp4', poster: 'media/posters/70emg-animation.jpg',
-    alt: '70EMG: a red wireframe structure glowing against a dark red background',
     film: '', year: '2025', role: 'Junior visual intern', context: 'Visual and video content for events and social media.',
+    clips: [
+      { label: 'Animation', loop: 'media/loops/70emg-animation.mp4', poster: 'media/posters/70emg-animation.jpg',
+        alt: '70EMG: a red wireframe structure glowing against a dark red background' },
+      { label: 'Nikhil Kamath', loop: 'media/loops/70emg-nikhil-kamath.mp4', poster: 'media/posters/70emg-nikhil-kamath.jpg',
+        alt: '70EMG: event invite with a black-and-white portrait of Nikhil Kamath over orange and blue shapes' },
+      { label: 'Generation Speed', loop: 'media/loops/70emg-generation-speed.mp4', poster: 'media/posters/70emg-generation-speed.jpg',
+        alt: '70EMG: Generation Speed logo animation, a green line-drawn car wheel on cream' },
+      { label: 'ELF', loop: 'media/loops/70emg-elf.mp4', poster: 'media/posters/70emg-elf.jpg',
+        alt: '70EMG: ELF promo with a woman applying lipstick in a polaroid frame over a pink sequinned backdrop' },
+    ],
   },
   {
     slug: 'funk-house', group: 'client', title: 'Funk House Media', meta: '2024', accent: '#26E1DD', ratio: '4 / 5',
     film: '', year: '2024', role: 'Junior video editor', context: 'Promotional videos for social media and ad campaigns.',
+    clips: [
+      { label: 'Sling', loop: 'media/loops/funk-house-sling.mp4', poster: 'media/posters/funk-house-sling.jpg',
+        alt: 'Funk House Media: a Dalwhinnie whisky bottle on a dim bar shelf' },
+      { label: 'Manetain', loop: 'media/loops/funk-house-manetain.mp4', poster: 'media/posters/funk-house-manetain.jpg',
+        alt: 'Funk House Media: a woman with curly hair and glasses talking to camera, with captions' },
+      { label: 'Iza Dawgs', loop: 'media/loops/funk-house-iza-dawgs.mp4', poster: 'media/posters/funk-house-iza-dawgs.jpg',
+        alt: 'Funk House Media: tongs lifting a seared piece of fish from a bowl of noodles and greens' },
+    ],
   },
 ];
 

@@ -98,15 +98,85 @@
     if (video) video.pause();
   }
 
-  document.querySelectorAll('[data-group]').forEach((list) => {
-    PROJECTS.filter((p) => p.group === list.dataset.group).forEach((p) => {
-      const card = renderCard(p);
-      list.append(list.tagName === 'UL' ? h('li', {}, card) : card);
+  /* Multi-clip cards: the card shows its active clip; Previous/Next (siblings of the card button, since
+     buttons can't nest) swap it with a crossfade and wrap at both ends. */
+
+  const activeClip = new Map();
+  const withClip = (p) => (p.clips ? { ...p, ...p.clips[activeClip.get(p.slug) || 0] } : p);
+  const ICON_PREV = '<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>';
+  const ICON_NEXT = '<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg>';
+
+  function swapClip(card, p, step, count, live) {
+    const i = ((activeClip.get(p.slug) || 0) + step + p.clips.length) % p.clips.length;
+    activeClip.set(p.slug, i);
+    const c = withClip(p);
+    const media = card.querySelector('.card__media');
+    const img = media.querySelector('img');
+    const video = media.querySelector('video');
+    const wasPlaying = card.classList.contains('is-playing');
+
+    if (!reduceMotion.matches && img) {
+      const ghost = img.cloneNode();
+      ghost.className = 'card__ghost';
+      ghost.removeAttribute('loading');
+      media.append(ghost);
+      requestAnimationFrame(() => requestAnimationFrame(() => ghost.classList.add('is-leaving')));
+      ghost.addEventListener('transitionend', () => ghost.remove(), { once: true });
+      setTimeout(() => ghost.remove(), 700);
+    }
+    stopLoop(card);
+    img.src = c.poster || c.still;
+    img.alt = c.alt;
+    if (video) {
+      if (c.loop) {
+        video.poster = c.poster;
+        video.src = c.loop;
+        video.hidden = false;
+      } else {
+        video.removeAttribute('src');
+        video.hidden = true;
+      }
+    }
+    if (wasPlaying && c.loop) playLoop(card);
+    card.setAttribute('aria-label', `${p.title}, ${c.label}`);
+    count.textContent = `${i + 1} / ${p.clips.length}`;
+    live.textContent = `Clip ${i + 1} of ${p.clips.length}: ${c.label}`;
+  }
+
+  function mountCard(list, p) {
+    const multi = p.clips && p.clips.length > 1;
+    const card = renderCard(withClip(p));
+    if (p.clips) card.setAttribute('aria-label', `${p.title}, ${p.clips[0].label}`);
+    let host = card;
+
+    if (multi) {
+      const count = h('span', { class: 'clip-nav__count', 'aria-hidden': 'true' }, `1 / ${p.clips.length}`);
+      const live = h('span', { class: 'visually-hidden', 'aria-live': 'polite' });
+      const prev = h('button', { type: 'button', class: 'clip-nav__btn', 'aria-label': `Previous clip, ${p.title}` });
+      const next = h('button', { type: 'button', class: 'clip-nav__btn', 'aria-label': `Next clip, ${p.title}` });
+      prev.innerHTML = ICON_PREV;
+      next.innerHTML = ICON_NEXT;
+      [prev, next].forEach((btn, n) => btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        swapClip(card, p, n ? 1 : -1, count, live);
+      }));
+      host = h('div', { class: 'clip-card' }, [card, h('div', { class: 'clip-nav' }, [prev, count, next]), live]);
+      setAccent(host, p.accent);
+      host.addEventListener('pointerenter', (e) => {
+        if (e.pointerType === 'mouse' && finePointer.matches) playLoop(card);
+      });
+      host.addEventListener('pointerleave', () => stopLoop(card));
+    } else {
       card.addEventListener('pointerenter', (e) => {
         if (e.pointerType === 'mouse' && finePointer.matches) playLoop(card);
       });
       card.addEventListener('pointerleave', () => stopLoop(card));
-    });
+    }
+    list.append(list.tagName === 'UL' ? h('li', {}, host) : host);
+  }
+
+  document.querySelectorAll('[data-group]').forEach((list) => {
+    PROJECTS.filter((p) => p.group === list.dataset.group).forEach((p) => mountCard(list, p));
   });
 
   /* Accent cycling: each hover/focus takes the next crayon-box colour.
@@ -331,14 +401,15 @@
   }
 
   function openPlayer(card) {
-    const p = PROJECTS.find((x) => x.slug === card.dataset.slug);
-    if (!p) return;
+    const base = PROJECTS.find((x) => x.slug === card.dataset.slug);
+    if (!base) return;
+    const p = withClip(base);
     trigger = card;
     stopLoop(card);
     setAccent(player, p.accent);
     stage.replaceChildren(playerMedia(p));
     player.querySelector('.player__title').textContent = p.title;
-    player.querySelector('.player__meta').textContent = [p.meta, p.year, p.role].filter(Boolean)
+    player.querySelector('.player__meta').textContent = [p.clips && p.clips.length > 1 ? p.label : null, p.meta, p.year, p.role].filter(Boolean)
       .filter((v, i, all) => all.indexOf(v) === i).join(' · ');
     player.querySelector('.player__context').textContent = p.context;
     document.documentElement.classList.add('is-locked');
