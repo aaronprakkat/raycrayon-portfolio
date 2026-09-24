@@ -477,12 +477,6 @@
         src: `media/stills/gumizoo-${c.slug}-640.webp`, srcset: srcset(c), sizes: '(min-width: 900px) 460px, 100vw',
         alt: c.alt, loading: 'lazy', decoding: 'async',
       }));
-      if (c.video) {
-        layer.append(h('video', {
-          muted: true, playsinline: true, loop: true, preload: 'none',
-          poster: c.video.poster, src: c.video.src, 'aria-hidden': 'true', tabindex: '-1',
-        }));
-      }
       layer.style.setProperty('--layer-bg', c.bg);
       layers.append(layer);
       layerFor[c.slug] = layer;
@@ -510,7 +504,6 @@
       const active = c ? layerFor[c.slug] : posterLayer;
       for (const layer of layers.children) {
         const on = layer === active;
-        if (!on) stopLoop(layer);
         layer.classList.toggle('is-active', on);
         if (on) layer.removeAttribute('aria-hidden');
         else layer.setAttribute('aria-hidden', 'true');
@@ -527,25 +520,16 @@
       }
       shown = c;
     };
-    // Only Nanju has a video: it plays in the display while his row is hovered or keyboard-focused.
-    const preview = (c) => {
-      show(c);
-      if (c && c.video) playLoop(layerFor[c.slug]);
-    };
-
     list.addEventListener('pointerover', (e) => {
       const row = e.target.closest('.gumizoo__row');
-      if (row && e.pointerType === 'mouse') preview(bySlug(row.dataset.slug));
+      if (row && e.pointerType === 'mouse') show(bySlug(row.dataset.slug));
     });
     list.addEventListener('pointerleave', (e) => {
       if (e.pointerType === 'mouse' && !list.contains(document.activeElement)) show(null);
     });
     list.addEventListener('focusin', (e) => {
       const row = e.target.closest('.gumizoo__row');
-      if (!row) return;
-      const c = bySlug(row.dataset.slug);
-      if (lastPointer === 'mouse') preview(c);
-      else show(c);
+      if (row) show(bySlug(row.dataset.slug));
     });
     list.addEventListener('focusout', (e) => {
       if (!list.contains(e.relatedTarget) && !gumiPanel.open) show(null);
@@ -562,7 +546,6 @@
       const c = bySlug(row.dataset.slug);
       gumiRow = row;
       gumiSource = shown === c && inView(display) ? layerFor[c.slug] : row.querySelector('.gumizoo__chip');
-      stopLoop(layerFor[c.slug]);
       gumiSource.style.viewTransitionName = 'gumi-portrait';
       morph(() => {
         gumiSource.style.viewTransitionName = '';

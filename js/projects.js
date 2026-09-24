@@ -187,7 +187,7 @@ const HERO_FILLS = [
 // fragments: small motifs scattered over the hover flood and the detail panel. These are PLACEHOLDERS cropped
 //   from the portrait ({ at: [x, y] centre as 0–1 fractions, zoom, shape }). To use a prepared transparent PNG
 //   instead, replace an entry with { src: 'media/stills/gumizoo-fragments/<file>.png' }. Positions live in CSS slots.
-// video: optional extra clip; it plays in the display on hover/focus and fills the panel's reserved slot.
+// video: optional extra clip; it plays only in the expanded panel's reserved slot, never over the display artwork.
 const GUMIZOO = {
   poster: {
     src: 'media/stills/gumizoo.webp',
