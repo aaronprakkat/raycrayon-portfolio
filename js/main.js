@@ -486,6 +486,13 @@
     img.src = b.render || p.poster || p.still;
     img.alt = b.renderAlt || p.alt;
 
+    // Same hover loop as the strip card, so the render stays responsive once the board is open.
+    stopLoop(boardRender);
+    const video = boardRender.querySelector('video');
+    video.poster = img.src;
+    if (p.loop && !b.render) video.src = p.loop;
+    else video.removeAttribute('src');
+
     board.querySelector('.swatches').replaceChildren(...b.palette.map((hex) => {
       const swatch = h('span', { 'aria-hidden': 'true' });
       swatch.style.background = hex;
@@ -531,6 +538,11 @@
     }).finally(() => { if (media) media.style.viewTransitionName = ''; });
   }
 
+  boardRender.addEventListener('pointerenter', (e) => {
+    if (e.pointerType === 'mouse' && finePointer.matches && boardRender.querySelector('video[src]')) playLoop(boardRender);
+  });
+  boardRender.addEventListener('pointerleave', () => stopLoop(boardRender));
+
   board.querySelector('.board__close').addEventListener('click', closeBoard);
   board.addEventListener('cancel', (e) => {
     e.preventDefault();
@@ -540,6 +552,7 @@
     if (!e.target.closest('.board__sheet > *, .board__close')) closeBoard();
   });
   board.addEventListener('close', () => {
+    stopLoop(boardRender);
     document.documentElement.classList.remove('is-locked');
     if (boardCard) boardCard.focus();
   });

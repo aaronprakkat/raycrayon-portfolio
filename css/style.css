@@ -1322,6 +1322,9 @@ button { font: inherit; color: inherit; }
   mix-blend-mode: soft-light;
 }
 
+/* Felines board: grain at the same strength as the grainy pills (Gumizoo's panel keeps its lighter grain). */
+#board::before { opacity: .5; }
+
 .board__close {
   position: fixed;
   top: 16px;
@@ -1343,7 +1346,29 @@ button { font: inherit; color: inherit; }
   padding: 76px var(--gutter) 48px;
 }
 
+/* Every piece on the board is pinned: title, render and each card get an ink pin at one top corner
+   (alternating sides) and, on desktop, their own small tilt. */
+.board__sheet > * { position: relative; }
+.board__sheet > *::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 18px;
+  z-index: 3;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #5A5A5A, #111111 60%);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, .35), 1px 5px 6px rgba(0, 0, 0, .15);
+}
+.board__sheet > :nth-child(even)::after { left: auto; right: 18px; }
+.board__sheet > .board__note::after { top: -4px; }
+
 .board__title {
+  justify-self: start;
+  padding: 16px 20px 14px;
+  background: #FAF8F2;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .1), 0 10px 24px rgba(0, 0, 0, .18);
   font: 400 clamp(40px, 10vw, 56px)/.9 var(--display);
   text-transform: uppercase;
 }
@@ -1353,13 +1378,24 @@ button { font: inherit; color: inherit; }
   width: min(100%, 420px);
   justify-self: center;
 }
-.board__render img {
+.board__render img,
+.board__render video {
+  display: block;
   width: 100%;
   aspect-ratio: 9 / 16;
   object-fit: cover;
   background: #FFFFFF;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 22px 48px rgba(0, 0, 0, .3);
 }
+.board__render img { box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 22px 48px rgba(0, 0, 0, .3); }
+/* The strip card's hover loop, laid over the render and faded in once it's actually playing. */
+.board__render video {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s var(--ease);
+}
+.board__render.is-playing video { opacity: 1; }
 
 .board__card {
   display: grid;
@@ -1370,20 +1406,31 @@ button { font: inherit; color: inherit; }
 }
 .board__card p { max-width: 40ch; }
 
+/* Palette swatches as paint chips: each its own little card with a shadow and an alternating tilt. */
 .swatches {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
   gap: 10px;
+  padding-top: 2px;
 }
-.swatches li { display: grid; gap: 6px; }
+.swatches li {
+  display: grid;
+  gap: 5px;
+  padding: 4px 4px 6px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .12), 0 4px 8px rgba(0, 0, 0, .14);
+  transform: rotate(-2.5deg);
+}
+.swatches li:nth-child(2n) { transform: rotate(2deg); }
+.swatches li:nth-child(3n) { transform: rotate(-1deg); }
 .swatches span {
   display: block;
   aspect-ratio: 1;
-  box-shadow: inset 0 0 0 1px rgba(17, 17, 17, .12);
+  box-shadow: inset 0 0 0 1px rgba(17, 17, 17, .08);
 }
 .swatches code {
   font: 500 11px/1 var(--sans);
-  letter-spacing: .06em;
+  letter-spacing: .04em;
 }
 
 .board__tags { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -1412,23 +1459,51 @@ button { font: inherit; color: inherit; }
 .board__caption p::after { content: close-quote; }
 .board__observation { font-size: 15px; }
 
+/* One-time reveal on open: the render arrives with the View Transitions morph, then the title and cards
+   fade and scale in one after another (60ms apart). Uses the standalone `scale` property so each piece keeps
+   its own tilt. Reduced motion: the global rule drops the animation, so everything is simply in place. */
+@keyframes board-pin-in {
+  from { opacity: 0; scale: .94; }
+}
+.board[open] .board__sheet > :not(.board__render) {
+  animation: board-pin-in .4s var(--ease) both;
+  animation-delay: calc(.32s + var(--i, 0) * 60ms);
+}
+.board__title    { --i: 0; }
+.board__palette  { --i: 1; }
+.board__style    { --i: 2; }
+.board__font     { --i: 3; }
+.board__elements { --i: 4; }
+.board__note     { --i: 5; }
+
+/* Desktop collage: the render is larger and the cards hug it, overlapping its edges, so the flood colour
+   isn't left sitting empty in the corners. Side cards spread down the render's full height. Tilts alternate
+   between about -3 and +4 degrees, no two neighbours alike. The phone layout stays a flat stack. */
 @media (min-width: 900px) {
   .board__sheet {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    grid-template-rows: auto auto auto 1fr;
-    column-gap: 24px;
-    row-gap: 28px;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-rows: repeat(3, auto);
+    column-gap: 0;
+    row-gap: 18px;
     align-content: center;
-    padding-block: 88px 64px;
+    max-width: 1240px;
+    padding-block: 72px 56px;
   }
-  .board__title   { grid-area: 1 / 1 / 2 / 5; align-self: end; transform: rotate(-2deg); }
-  .board__palette { grid-area: 2 / 1 / 3 / 5; justify-self: end; width: min(100%, 340px); margin-right: -20px; z-index: 2; transform: rotate(1.6deg); }
-  .board__style   { grid-area: 3 / 2 / 4 / 5; justify-self: end; margin-right: -12px; transform: rotate(-1.2deg); }
-  .board__render  { grid-area: 1 / 5 / 5 / 9; width: min(100%, calc(76svh * 9 / 16)); align-self: center; z-index: 1; transform: rotate(-2.5deg); }
-  .board__font    { grid-area: 1 / 9 / 2 / 12; align-self: end; margin-left: -28px; z-index: 2; transform: rotate(2.4deg); }
-  .board__elements{ grid-area: 2 / 9 / 3 / 13; margin-left: 8px; transform: rotate(-1.4deg); }
-  .board__note    { grid-area: 3 / 9 / 5 / 13; align-self: start; margin-left: -28px; z-index: 2; transform: rotate(2deg); }
+  .board__render  { grid-area: 1 / 2 / 4 / 3; width: calc(80svh * 9 / 16); max-width: 460px; min-width: 330px; align-self: center; z-index: 1; transform: rotate(-2deg); }
+  .board__title   { grid-area: 1 / 1; align-self: end; justify-self: end; margin-right: 40px; transform: rotate(-3deg); }
+  .board__palette { grid-area: 2 / 1; align-self: center; justify-self: end; width: min(100%, 390px); margin-right: -22px; z-index: 2; transform: rotate(2deg); }
+  .board__style   { grid-area: 3 / 1; align-self: start; justify-self: end; width: min(100%, 320px); margin-right: 16px; transform: rotate(-1.5deg); }
+  .board__font    { grid-area: 1 / 3; align-self: end; justify-self: start; width: min(100%, 300px); margin-left: -26px; z-index: 2; transform: rotate(3.5deg); }
+  .board__elements{ grid-area: 2 / 3; align-self: center; justify-self: start; width: min(100%, 360px); margin-left: 18px; transform: rotate(-2.5deg); }
+  .board__note    { grid-area: 3 / 3; align-self: start; justify-self: start; width: min(100%, 340px); margin-left: -18px; z-index: 2; transform: rotate(1.5deg); }
   .board__title span { font-size: .5em; letter-spacing: .02em; }
+}
+/* Wide screens: room for the palette chips on one row, and a slightly larger render. */
+@media (min-width: 1200px) {
+  .board__sheet { max-width: 1400px; }
+  .board__render { max-width: 500px; }
+  .swatches { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; }
+  .swatches code { letter-spacing: 0; }
 }
 
 /* Gumizoo detail panel: reuses .board's grainy accent background and close button */

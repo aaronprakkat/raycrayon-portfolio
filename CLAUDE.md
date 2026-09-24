@@ -54,6 +54,13 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
    - Arrows swap the active clip's poster and loop with a crossfade (instant under reduced motion), wrap at both ends, and never open anything. A polite live region announces "Clip 2 of 4: <label>".
    - Clicking the card body opens the player on the active clip. Because buttons can't nest, the arrows are siblings of the card button inside a `.clip-card` wrapper. Cards with one clip get no arrows.
 4. **Felines strip:** a row of the Felines pieces. Hovering or focusing one changes the whole section background to that piece's color. Moving away returns to the base color.
+   - **Detail panel (`#board`):** clicking a Feline opens a full-screen "pinned mood board" on that piece's grainy accent background (accent gradient + `--grain`, soft-light at .5, like the grainy pills). The card's image morphs into the main render via View Transitions. Six fields, same for every Feline (see `claude/01-brand-and-design-system.md`): main render, palette, style, font, elements used, explanation (torn sticky note). DOM order follows that reading order whatever the visual position.
+   - **Collage (900px+):** the render sits large in the centre (80svh tall, 500px max) with the title and cards clustered tight around it, overlapping its edges, spread down its full height so no corner is left empty. Every piece, including the render and the title (itself a small paper card), has its own tilt between about -3° and +4°, never the same as its neighbour.
+   - **Pins:** every piece carries one motif, a small ink pin (dark dot with a drop shadow) at a top corner, alternating sides.
+   - **Palette:** swatches are paint chips: white chip, own drop shadow, alternating slight tilt. One row from 1200px; they wrap below that.
+   - **Entry:** the render arrives with the morph, then the title and cards fade/scale in 60ms apart (one-time, on open; uses the `scale` property so tilts are kept). Reduced motion: no stagger, everything already in place.
+   - **Render hover:** the same hover as the strip card: with a mouse, the render swaps to the piece's muted loop (`media/loops/felines-0N.mp4`) and pauses on leave. Not on touch or under reduced motion.
+   - **Phones (under 900px):** a flat single-column stack in reading order, with pins and chips but no card tilts or overlap.
 
 **Section behavior:** when the Pangeo section scrolls into view, the page background transitions to dark (lights dimming, like a projection room), and back to light when it leaves.
 
