@@ -226,7 +226,7 @@ const GUMIZOO = {
     {
       slug: 'ashik-rancher', name: 'Ashik', surname: 'Rancher', trait: 'Hard-headed.', accent: '#B72D03', bg: '#5F0C8C',
       alt: 'Ashik Rancher: a red-orange 3D gummy monkey head with jagged teeth and a scowl, on purple',
-      bio: 'Ashik is convinced he’s right about everything, mostly because he’s never once been wrong loud enough to notice. Named after ranch dressing — goes on everything, argues with nothing.',
+      bio: 'Ashik is convinced he’s right about everything, mostly because he’s never once been wrong loud enough to notice. Named after ranch dressing: goes on everything, argues with nothing.',
       bioDraft: true,
       fragments: [
         { at: [0.47, 0.55], zoom: 6, shape: 'tooth' },
@@ -248,7 +248,7 @@ const GUMIZOO = {
     {
       slug: 'nanju-jam', name: 'Nanju', surname: 'Jam', trait: 'Gambling-type stupid.', accent: '#9A8807', bg: '#F4B60C',
       alt: 'Nanju Jam: an olive-green 3D gummy monkey head with dripping hair and clenched teeth, on yellow',
-      bio: 'Nanju bets on things that were never a competition — staring contests with the microwave, mostly. Named after jam because he’s sticky, unpredictable, and somehow always all over the place.',
+      bio: 'Nanju bets on things that were never a competition, staring contests with the microwave, mostly. Named after jam because he’s sticky, unpredictable, and somehow always all over the place.',
       bioDraft: true,
       fragments: [
         { at: [0.49, 0.63], zoom: 6, shape: 'tooth' },
@@ -265,7 +265,7 @@ const GUMIZOO = {
     {
       slug: 'rana-ghee', name: 'Rana', surname: 'Ghee', trait: 'Boy-crazy.', accent: '#CF6C74', bg: '#1E4BC8',
       alt: 'Rana Ghee: a pink 3D gummy monkey head with purple hair, star eyes and a blue tongue, on blue',
-      bio: 'Rana falls in love roughly every eleven minutes, usually with someone who hasn’t noticed her yet. Named after ghee because she melts — fast, and often.',
+      bio: 'Rana falls in love roughly every eleven minutes, usually with someone who hasn’t noticed her yet. Named after ghee because she melts fast, and often.',
       bioDraft: true,
       fragments: [
         { at: [0.58, 0.47], zoom: 10, shape: 'star' },
