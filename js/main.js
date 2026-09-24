@@ -259,7 +259,9 @@
 
     if (CSS.supports('(-webkit-background-clip: text) or (background-clip: text)')) heroWord.classList.add('has-fill');
     showPiece(HERO_FILLS[0], false);
-    addEventListener('load', () => HERO_FILLS.forEach((p) => { new Image().src = p.src; }), { once: true });
+    // Phones only show the small still block (the letters are solid type there), so warm up those instead.
+    const narrow = matchMedia('(max-width: 699px)');
+    addEventListener('load', () => HERO_FILLS.forEach((p) => { new Image().src = narrow.matches ? p.small : p.src; }), { once: true });
 
     heroWord.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') next(); });
     heroWord.addEventListener('focus', () => { if (heroWord.matches(':focus-visible')) next(); });

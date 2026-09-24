@@ -1436,6 +1436,41 @@ button { font: inherit; color: inherit; }
   animation-duration: .45s;
 }
 
+/* Phone polish (under 700px): 44px tap targets, nothing under 12px, tighter section rhythm, and caps on the
+   two tallest media blocks so no single piece takes over the screen. Desktop is unaffected. */
+html { -webkit-tap-highlight-color: transparent; }
+@media (max-width: 699px) {
+  .band { padding-block: 44px; }
+  .band--intro { padding-bottom: 0; }
+  .band--rule { padding-top: 0; }
+  .band--rule > .wrap { padding-top: 40px; }
+  .hero .wrap { padding-bottom: 44px; }
+  .section-head { margin-bottom: 28px; }
+  .project-head { margin-bottom: 20px; }
+  .work-intro { margin-bottom: 28px; }
+
+  .nav__brand { min-height: 44px; }
+  .hero__line-text { display: inline-block; padding-block: .26em .28em; }
+  .contact__email { display: inline-block; min-height: 44px; padding-block: .2em .1em; }
+  .contact__links .pill { min-height: 48px; }
+
+  .card__meta,
+  .clip-nav__count { font-size: 12px; }
+  .clip-nav { left: 6px; right: 6px; bottom: calc(var(--label-h, 43px) + 6px); }
+  .clip-nav__btn { width: 44px; height: 44px; }
+  .clip-nav__btn svg { width: 20px; height: 20px; }
+
+  .gumizoo__display { width: min(100%, calc(64svh * 9 / 16)); }
+  .gumizoo__row { min-height: 64px; }
+  .pangeo-grid .card[data-tile="flagship"] { width: min(100%, calc(64svh * 9 / 16)); }
+
+  .xp li { padding: 20px 0; }
+  .xp__heading { margin: 40px 0 12px; }
+  .about { gap: 28px; }
+  .about__photo { width: min(100%, 280px); }
+  .footer .wrap { padding-block: 24px 28px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     transition: none !important;
