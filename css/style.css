@@ -175,13 +175,16 @@ button { font: inherit; color: inherit; }
    screen-then-multiply duotone the site uses elsewhere); hovering, focusing or pressing the word moves on to
    the next piece. .has-fill is added by main.js only when background-clip: text is supported. */
 .hero .wrap {
+  /* The wordmark's font-size, shared so the tagline can scale as a fixed fraction of it. Left unresolved
+     here on purpose: cqi resolves where it's used, against this .wrap container. */
+  --wordmark: min(calc(100cqi / 3.55), calc(var(--max) / 3.55));
   padding-block: clamp(24px, 3.5vw, 52px) clamp(64px, 8vw, 128px);
   container-type: inline-size;
 }
 /* The divisor sets the word's width to ~98% of the content box (Bebas RAYCRAYON ≈ 3.48em wide). */
 .hero__name {
   margin-top: clamp(14px, 2.2vw, 32px);
-  font: 400 min(calc(100cqi / 3.55), calc(var(--max) / 3.55))/.84 var(--display);
+  font: 400 var(--wordmark)/.84 var(--display);
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -280,11 +283,15 @@ button { font: inherit; color: inherit; }
   align-items: center;
   justify-content: space-between;
   gap: 24px 40px;
-  margin-top: clamp(28px, 4.2vw, 68px);
+  margin-top: clamp(36px, calc(var(--wordmark) * .2), 80px);
 }
+/* Uppercase and tracked so it reads as the wordmark's second line, sized as a fixed fraction of the wordmark.
+   The 17px floor only engages on phones, where the pure ratio would get too small to read. */
 .hero__line {
-  font: 600 clamp(26px, 3.3vw, 48px)/1.15 var(--sans);
-  letter-spacing: -.015em;
+  font: 600 clamp(17px, calc(var(--wordmark) * .085), 34px)/1.2 var(--sans);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-wrap: balance;
 }
 /* Focusable so keyboard users get the same accent moment; it fills like the pills (shared .js-fill cycling). */
 .hero__line-text {

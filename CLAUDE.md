@@ -65,7 +65,7 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
 1. **Nav:** RAYCRAYON wordmark left. Work, About, Contact right.
 2. **Hero:** eyebrow line, then RAYCRAYON at full content width (~98%, sized with `100cqi / 3.55`), then the tagline and two buttons.
    - The wordmark sits on the plain background with no box or outline. Its letters are filled with a duotoned still (SVG `feColorMatrix`, accent + `#FAF8F2`) cycling Pangeo, Mystery Shack, 70EMG, 0200, BLR 2025, Render House on hover/focus/press; it never reverts. Accents: pink, orange, cobalt only (lime and cyan are too light to hold letterforms). Under 700px: solid ink type, with the current still shown as its own block.
-   - Tagline "3D worlds with a pulse." is a second-tier headline (Inter 600, up to 48px), keyboard-focusable, and fills with the cycling accent like the buttons.
+   - Tagline "Bringing ideas into three dimensions." is a second-tier headline: Inter 600, uppercase, letter-spacing .06em, balanced line breaks. Its size is `clamp(17px, var(--wordmark) * .085, 34px)`, so it stays a fixed fraction of the wordmark (`--wordmark` is defined on `.hero .wrap`). The gap above it is `clamp(36px, var(--wordmark) * .2, 80px)`. It's keyboard-focusable and fills with the cycling accent like the buttons.
    - Buttons "See the work" / "Get in touch": 14px/600 labels, grainy gradient accent fill on hover/focus. On phones they share a row or stack full width.
    - No 3D model in the hero.
 3. **Selected work:** personal projects.
