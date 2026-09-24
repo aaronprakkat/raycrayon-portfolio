@@ -200,17 +200,20 @@
   });
 
   /* Hero: RAYCRAYON as a window onto Ryan's work. Hover, keyboard focus or a press moves on to the next piece;
-     it never reverts, like the button accent cycling. */
+     it never reverts, like the button accent cycling. On desktop with WebGL (and no reduced motion) the letters
+     are a WebGL canvas (js/hero-ripple.js) that ripples under the cursor and melts into the next piece; otherwise
+     they're the CSS background-clip version, swapping instantly. */
 
   const heroWord = document.querySelector('.hero__word');
   if (heroWord && typeof HERO_FILLS !== 'undefined') {
-    const back = heroWord.querySelector('.hero__fill--back');
-    const front = heroWord.querySelector('.hero__fill--front');
+    const back = heroWord.querySelector('.hero__fill');
     const swatchImg = heroWord.querySelector('.hero__swatch-img');
     const swatchLabel = heroWord.querySelector('.hero__swatch-label');
     const note = document.getElementById('hero-piece');
     let index = 0;
-    let fadeTimer = null;
+    let ripple = null;
+    const wide = matchMedia('(min-width: 700px)');
+    const rippleOn = () => Boolean(ripple) && wide.matches && !reduceMotion.matches;
 
     // One duotone filter per accent: luminance 0 → accent, 1 → off-white (#FAF8F2), alpha untouched.
     const defs = document.querySelector('.hero__filters defs');
@@ -233,37 +236,56 @@
       el.style.setProperty('--tint', piece.accent);
       el.style.setProperty('--duo', `url(#${filterId[piece.accent]})`);
     };
-    const showPiece = (piece, animate) => {
+    // The CSS layer always tracks the current piece, so switching to the fallback at any point is seamless.
+    const showPiece = (piece, origin) => {
       paint(swatchImg, piece, piece.small);
       swatchLabel.textContent = piece.title;
       note.textContent = `Inside the letters: a still from ${piece.title}. Hover, focus or press the name to see the next piece.`;
-      clearTimeout(fadeTimer);
-      if (!animate || reduceMotion.matches) {
-        paint(back, piece, piece.src);
-        front.classList.remove('is-shown');
-        return;
-      }
-      paint(front, piece, piece.src);
-      front.classList.remove('is-shown');
-      void front.offsetWidth;
-      front.classList.add('is-shown');
-      fadeTimer = setTimeout(() => {
-        paint(back, piece, piece.src);
-        front.classList.remove('is-shown');
-      }, 520);
+      paint(back, piece, piece.src);
+      if (rippleOn()) ripple.show(piece, origin).catch(() => {});
     };
-    const next = () => {
+    const next = (origin = null) => {
       index = (index + 1) % HERO_FILLS.length;
-      showPiece(HERO_FILLS[index], true);
+      showPiece(HERO_FILLS[index], origin);
     };
 
     if (CSS.supports('(-webkit-background-clip: text) or (background-clip: text)')) heroWord.classList.add('has-fill');
-    showPiece(HERO_FILLS[0], false);
-    // Phones only show the small still block (the letters are solid type there), so warm up those instead.
-    const narrow = matchMedia('(max-width: 699px)');
-    addEventListener('load', () => HERO_FILLS.forEach((p) => { new Image().src = narrow.matches ? p.small : p.src; }), { once: true });
+    showPiece(HERO_FILLS[0], null);
 
-    heroWord.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') next(); });
+    const syncRipple = () => {
+      if (!ripple) return;
+      const on = rippleOn();
+      heroWord.classList.toggle('is-gl', on);
+      ripple.setActive(on);
+      if (on) ripple.set(HERO_FILLS[index]).catch(() => {});
+    };
+    const canWebGL = (() => {
+      try {
+        const c = document.createElement('canvas');
+        return Boolean(c.getContext('webgl2') || c.getContext('webgl'));
+      } catch { return false; }
+    })();
+
+    addEventListener('load', () => {
+      if (canWebGL && wide.matches && !reduceMotion.matches) {
+        const clipText = document.querySelector('#wordmark-clip text');
+        import(new URL('js/hero-ripple.js', document.baseURI).href)
+          .then((m) => m.createRipple({ word: heroWord, text: back, clipText, first: HERO_FILLS[index] }))
+          .then((r) => {
+            ripple = r;
+            ripple.preload(HERO_FILLS);
+            syncRipple();
+          })
+          .catch(() => heroWord.querySelector('.hero__gl')?.remove());
+      } else {
+        // Warm up whichever stills this device will show: the small block on phones, the letter fill otherwise.
+        HERO_FILLS.forEach((p) => { new Image().src = wide.matches ? p.src : p.small; });
+      }
+    }, { once: true });
+    wide.addEventListener('change', syncRipple);
+    reduceMotion.addEventListener('change', syncRipple);
+
+    heroWord.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') next([e.clientX, e.clientY]); });
     heroWord.addEventListener('focus', () => { if (heroWord.matches(':focus-visible')) next(); });
     heroWord.addEventListener('click', (e) => { if (e.detail === 0 || lastPointer !== 'mouse') next(); });
   }

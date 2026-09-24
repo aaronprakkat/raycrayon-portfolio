@@ -5,12 +5,13 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
 ## Stack and conventions
 
 - Plain HTML, CSS and JavaScript. No framework, no build step, no npm.
-- No external JS libraries, no exceptions. Google Fonts is the only external request. (`<model-viewer>` was used for a 3D model until 2026-09-24 and has been removed along with its `.glb`.)
+- No external JS libraries, with one approved exception: `ogl` for the hero wordmark's WebGL ripple, pinned as an ES module at `https://cdn.jsdelivr.net/npm/ogl@1.0.11/+esm` (~39 KB compressed). It's only fetched, via dynamic `import()` from `js/hero-ripple.js`, on desktop (700px+) with WebGL and no reduced-motion preference. Otherwise Google Fonts is the only external request. (`<model-viewer>`, the previous exception, was removed on 2026-09-24.)
 - Files:
   - `index.html` page structure
   - `css/style.css` all styles, colors as CSS custom properties on `:root`
   - `js/projects.js` project data (the work grid renders from this list)
   - `js/main.js` rendering and interactions
+  - `js/hero-ripple.js` the wordmark's WebGL ripple (ES module, loaded on demand)
   - `media/loops/` short hover loops, plus the `sira-cow.mp4` ambient loop (MP4)
   - `media/posters/` poster frames for loops (JPG)
   - `media/stills/` still images (WebP; the About headshot is `about-headshot.jpg`)
@@ -42,7 +43,10 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
 
 ## Interactions (the only four)
 
-1. **Hero name:** RAYCRAYON's letters are a window onto a duotoned still of Ryan's work; hover, focus or press moves on to the next piece (see Page sections).
+1. **Hero name:** RAYCRAYON's letters are a window onto a duotoned still of Ryan's work.
+   - Hover-enter, focus or press moves on to the next piece (see Page sections).
+   - On desktop with WebGL, the letters are a WebGL canvas: the image ripples under a moving cursor, and each swap melts outward from where it was triggered (from the centre on keyboard focus).
+   - The render loop only runs while the cursor moves or a swap is in progress, and never while the wordmark is off-screen.
 2. **Buttons, nav links, tagline and tags:** fill with a different accent each time they are hovered or focused (cycle through the palette, one shared handler via `.js-fill` / `.js-accent`). The hero buttons use the grainy gradient version of the fill.
 3. **Project cards:** on hover the poster swaps to its muted loop and the title label fills with that project's accent. On touch devices, no hover: tap opens the player.
    - **Multi-clip cards** (a `clips` list in `js/projects.js`): the card shows one active clip, clip 1 by default. Previous/Next arrow buttons and a "2 / 4" counter sit in a slim bar over the bottom of the media: revealed on hover/focus on desktop, always visible on touch.
@@ -64,7 +68,11 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
 
 1. **Nav:** RAYCRAYON wordmark left. Work, About, Contact right.
 2. **Hero:** eyebrow line, then RAYCRAYON at full content width (~98%, sized with `100cqi / 3.55`), then the tagline and two buttons.
-   - The wordmark sits on the plain background with no box or outline. Its letters are filled with a duotoned still (SVG `feColorMatrix`, accent + `#FAF8F2`) cycling Pangeo, Mystery Shack, 70EMG, 0200, BLR 2025, Render House on hover/focus/press; it never reverts. Accents: pink, orange, cobalt only (lime and cyan are too light to hold letterforms). Under 700px: solid ink type, with the current still shown as its own block.
+   - The wordmark sits on the plain background with no box or outline. Its letters are filled with a duotoned still (accent + `#FAF8F2`) cycling Pangeo, Mystery Shack, 70EMG, 0200, BLR 2025, Render House on hover/focus/press; it never reverts. Accents: pink, orange, cobalt only (lime and cyan are too light to hold letterforms).
+   - Two renderers, same look at rest:
+     - **WebGL** (`js/hero-ripple.js`, desktop 700px+ with WebGL and no reduced motion): a canvas over the text's line box, clipped to the letters by the SVG `#wordmark-clip`. The clip redraws the word at the same font size and measured baseline. The shader applies the same duotone math as the CSS filter.
+     - **CSS fallback** (no WebGL, or reduced motion): `background-clip: text` with an SVG `feColorMatrix` filter per accent. Swaps are instant.
+   - Under 700px: solid ink type, with the current still shown as its own block; no canvas, and `ogl` is never loaded.
    - Tagline "Bringing ideas into three dimensions." is a second-tier headline: Inter 600, uppercase, letter-spacing .06em, balanced line breaks. Its size is `clamp(17px, var(--wordmark) * .085, 34px)`, so it stays a fixed fraction of the wordmark (`--wordmark` is defined on `.hero .wrap`). The gap above it is `clamp(36px, var(--wordmark) * .2, 80px)`. It's keyboard-focusable and fills with the cycling accent like the buttons.
    - Buttons "See the work" / "Get in touch": 14px/600 labels, grainy gradient accent fill on hover/focus. On phones they share a row or stack full width.
    - No 3D model in the hero.

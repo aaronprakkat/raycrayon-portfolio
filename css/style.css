@@ -207,12 +207,18 @@ button { font: inherit; color: inherit; }
   display: block;
   white-space: nowrap;
 }
-.hero__fill--front {
+/* WebGL version (main.js adds .is-gl once it has drawn): a canvas over the text's line box, clipped to the
+   letterforms by #wordmark-clip. The text stays in place, invisible, to hold the layout. */
+.hero__gl {
   position: absolute;
   inset: 0 0 auto;
-  opacity: 0;
+  display: none;
+  width: 100%;
   pointer-events: none;
+  clip-path: url(#wordmark-clip);
 }
+.hero__word.is-gl .hero__gl { display: block; }
+.hero__word.is-gl .hero__fill { visibility: hidden; }
 /* Duotone: dark → accent, light → #FAF8F2. Chrome ignores background-blend-mode inside text-clipped
    backgrounds, so the letters use an SVG feColorMatrix filter (one per accent, built in main.js) on the
    clipped greyscale still; the standalone mobile block uses the CSS blend version. */
@@ -234,10 +240,6 @@ button { font: inherit; color: inherit; }
   background-size: cover;
   background-position: center;
 }
-.hero__fill--front.is-shown {
-  opacity: 1;
-  transition: opacity .5s var(--ease);
-}
 .hero__swatch { display: none; }
 
 /* At phone size, text-clipped imagery turns to mush: solid ink type, and the still as its own block. */
@@ -248,7 +250,8 @@ button { font: inherit; color: inherit; }
     color: var(--fg);
     filter: none;
   }
-  .hero__fill--front { display: none; }
+  .hero__gl { display: none !important; }
+  .hero__word.is-gl .hero__fill { visibility: visible; }
   .hero__swatch {
     display: grid;
     gap: 8px;
