@@ -11,7 +11,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="css/style.css">
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script>
   <script src="js/projects.js" defer></script>
   <script src="js/main.js" defer></script>
 </head>
@@ -52,10 +51,10 @@
         <p class="visually-hidden" id="hero-piece"></p>
         <svg class="hero__filters" width="0" height="0" aria-hidden="true" focusable="false"><defs></defs></svg>
         <div class="hero__foot">
-          <p class="hero__line">3D worlds with a pulse.</p>
+          <p class="hero__line"><span class="hero__line-text js-fill" tabindex="0">3D worlds with a pulse.</span></p>
           <div class="hero__actions">
-            <a class="pill js-fill" href="#work">See the work</a>
-            <a class="pill js-fill" href="#contact">Get in touch</a>
+            <a class="pill pill--grain js-fill" href="#work">See the work</a>
+            <a class="pill pill--grain js-fill" href="#contact">Get in touch</a>
           </div>
         </div>
       </div>
@@ -69,14 +68,8 @@
             <h2 class="display" id="work-title">Personal projects</h2>
           </div>
           <div class="spotlight" aria-hidden="true">
-            <model-viewer class="spotlight__model"
-              src="media/models/hero-character.glb"
-              tabindex="-1" loading="lazy" reveal="auto"
-              camera-controls disable-zoom disable-pan disable-tap touch-action="pan-y" interaction-prompt="none"
-              auto-rotate rotation-per-second="10deg"
-              camera-target="-1.52m 4.65m -0.31m" camera-orbit="0deg 82deg 7.7m" field-of-view="25deg"
-              min-camera-orbit="auto 82deg 7.7m" max-camera-orbit="auto 82deg 7.7m"
-              environment-image="media/models/spotlight-env.hdr" exposure="3.2" shadow-intensity="0"><div slot="pan-target" class="spotlight__slot"></div></model-viewer>
+            <video class="spotlight__video" src="media/loops/sira-cow.mp4" poster="media/posters/sira-cow.jpg"
+              muted loop playsinline preload="none" tabindex="-1"></video>
           </div>
         </div>
       </section>
@@ -197,8 +190,9 @@
           <h2 class="display" id="about-title">Ryan Abraham Thomas</h2>
         </div>
         <div class="about">
-          <!-- Photo slot: the processed headshot drops in here as an <img> with alt text. -->
-          <div class="about__photo" aria-hidden="true"></div>
+          <figure class="about__photo">
+            <img src="media/stills/about-headshot.jpg" width="828" height="1035" alt="Portrait of Ryan Abraham Thomas" loading="lazy" decoding="async">
+          </figure>
           <p class="about__bio">My passion for visual art comes from a constant curiosity to understand how things can be imagined, created, and brought to life. I enjoy exploring 3D modelling, digital illustration, motion graphics, and video as different ways of expressing an idea and telling a story. I’m driven by experimentation, attention to detail, and the desire to keep learning and pushing my creative boundaries.</p>
           <div class="about__lists">
             <div>

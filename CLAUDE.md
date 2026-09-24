@@ -5,16 +5,15 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
 ## Stack and conventions
 
 - Plain HTML, CSS and JavaScript. No framework, no build step, no npm.
-- No external JS libraries, with one approved exception: Google's `<model-viewer>` for the hero 3D model, loaded as a module from `https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js`. Keep the version pinned (there is no `latest` path on that CDN). Otherwise Google Fonts is the only external request.
+- No external JS libraries, no exceptions. Google Fonts is the only external request. (`<model-viewer>` was used for a 3D model until 2026-09-24 and has been removed along with its `.glb`.)
 - Files:
   - `index.html` page structure
   - `css/style.css` all styles, colors as CSS custom properties on `:root`
   - `js/projects.js` project data (the work grid renders from this list)
   - `js/main.js` rendering and interactions
-  - `media/loops/` short hover loops (MP4)
+  - `media/loops/` short hover loops, plus the `sira-cow.mp4` ambient loop (MP4)
   - `media/posters/` poster frames for loops (JPG)
-  - `media/stills/` still images (WebP)
-  - `media/models/` web 3D models (GLB). Exported from Ryan's .blend as a static, decimated mesh, 3 MB or less, no Draco (it needs an extra decoder request)
+  - `media/stills/` still images (WebP; the About headshot is `about-headshot.jpg`)
   - `source/` raw files from Drive. Git-ignored. Never reference from the site.
 - Media file names: `project-piece`, lowercase, hyphenated (e.g. `pangeo-lust.mp4`).
 - When media is missing, render a solid block in the project's accent color with its title. No broken images, no visible "placeholder" text.
@@ -29,7 +28,7 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
 - Dark section (Pangeo only): background `#0B0B0E`, text `#F4F0DF`
 - Accent "crayon box", used only for hover, focus and active states:
   pink `#FF3DAC`, cobalt `#3154FF`, lime `#B8FF38`, orange `#FF5C2B`, cyan `#26E1DD`
-- Never put all accents in one component. Never use gradients or glassmorphism in the UI.
+- Never put all accents in one component. No gradients or glassmorphism in the UI, except the grainy gradient hover treatment (accent gradient + grain, soft-light), which only appears on interaction.
 
 **Type**
 - Display: Bebas Neue (Google Fonts), uppercase, tight line-height. Used for big headings and project titles.
@@ -43,8 +42,8 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
 
 ## Interactions (the only four)
 
-1. **Hero name:** each letter of RAYCRAYON turns a different accent color on hover, then fades back.
-2. **Buttons and nav links:** fill with a different accent each time they are hovered (cycle through the palette).
+1. **Hero name:** RAYCRAYON's letters are a window onto a duotoned still of Ryan's work; hover, focus or press moves on to the next piece (see Page sections).
+2. **Buttons, nav links, tagline and tags:** fill with a different accent each time they are hovered or focused (cycle through the palette, one shared handler via `.js-fill` / `.js-accent`). The hero buttons use the grainy gradient version of the fill.
 3. **Project cards:** on hover the poster swaps to its muted loop and the title label fills with that project's accent. On touch devices, no hover: tap opens the player.
 4. **Felines strip:** a row of the Felines pieces. Hovering or focusing one changes the whole section background to that piece's color. Moving away returns to the base color.
 
@@ -61,16 +60,20 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
 ## Page sections (in order)
 
 1. **Nav:** RAYCRAYON wordmark left. Work, About, Contact right.
-2. **Hero:** big name, one-line role, one short sentence, and Ryan's signature 3D character in `<model-viewer>` (`media/models/hero-character.glb`), layered on top of the RAYCRAYON wordmark so it stands on the name. Slow auto-rotate, drag to turn, no zoom, poster still while loading, no auto-rotate under reduced motion. Suggested line: "3D worlds with a pulse."
+2. **Hero:** eyebrow line, then RAYCRAYON at full content width (~98%, sized with `100cqi / 3.55`), then the tagline and two buttons.
+   - The wordmark sits on the plain background with no box or outline. Its letters are filled with a duotoned still (SVG `feColorMatrix`, accent + `#FAF8F2`) cycling Pangeo, Mystery Shack, 70EMG, 0200, BLR 2025, Render House on hover/focus/press; it never reverts. Accents: pink, orange, cobalt only (lime and cyan are too light to hold letterforms). Under 700px: solid ink type, with the current still shown as its own block.
+   - Tagline "3D worlds with a pulse." is a second-tier headline (Inter 600, up to 48px), keyboard-focusable, and fills with the cycling accent like the buttons.
+   - Buttons "See the work" / "Get in touch": 14px/600 labels, grainy gradient accent fill on hover/focus. On phones they share a row or stack full width.
+   - No 3D model in the hero.
 3. **Selected work:** personal projects.
+   - Intro: "Personal projects" heading beside a square dark (`#0B0B0E`) window playing `media/loops/sira-cow.mp4` (the full 10s turntable, muted, cover-fit, soft vignette). It is the page's one continuous motion at rest: an IntersectionObserver plays it when ~25% visible and pauses it when it leaves. Reduced motion: stays on its poster. Decorative, `aria-hidden`.
    - Felines (strip, see interactions)
-   - Gumizoo (character collection)
-   - Pangeo (dark section, projection mapping)
-   - Mystery Shack (Gravity Falls tribute)
-   - Other personal work
+   - Gumizoo (character roster + detail panels)
+   - Pangeo (dark section, bento grid, projection mapping)
+   - More personal work: 0200, BLR 2025, Render House (still), Mystery Shack (Gravity Falls tribute)
 4. **Client work:** ASTERISK, 70EMG, Funk House Media.
-5. **Experience:** from the CV below, as a clean list.
-6. **About and tools:** short bio, skills, software.
+5. **Experience:** from the CV below, as a vertical roadmap whose nodes light once, in crayon-box order, as entries scroll in.
+6. **About and tools:** short bio, skills, software (tags use the accent cycling), and the headshot `media/stills/about-headshot.jpg` (alt "Portrait of Ryan Abraham Thomas") in a 4:5 hairline frame, `object-fit: cover`. It sits right of the tags on desktop, above them on tablet, first on phones.
 7. **Contact:** large email link and Instagram. No phone number.
 
 ## Content
@@ -123,7 +126,7 @@ Full-film links (YouTube/Vimeo): add here as they're uploaded.
 
 ## Media rules
 
-- Hover loops: 6 to 10 seconds, 720p, H.264, no audio, 3 MB or less, `-movflags +faststart`.
+- Hover loops: 6 to 10 seconds, 720p, H.264, no audio, 3 MB or less, `-movflags +faststart`. Ambient loops (currently only `sira-cow.mp4`) keep their natural length and are sized to where they render; same codec rules.
 - Posters: JPG, 1080px tall, from the same moment as the loop start.
 - Stills: WebP, 2000px wide max.
 - Full films are embedded from YouTube/Vimeo, never stored in the repo.

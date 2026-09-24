@@ -247,13 +247,15 @@
     }
   }
 
-  /* Selected work: the model turns slowly in its spotlight window, except under reduced motion */
+  /* Selected work: the sira_cow loop plays while its window is in view; reduced motion keeps the poster */
 
-  const spotModel = document.querySelector('.spotlight__model');
-  if (spotModel) {
-    const syncMotion = () => spotModel.toggleAttribute('auto-rotate', !reduceMotion.matches);
-    syncMotion();
-    reduceMotion.addEventListener('change', syncMotion);
+  const spotVideo = document.querySelector('.spotlight__video');
+  if (spotVideo && !reduceMotion.matches && 'IntersectionObserver' in window) {
+    spotVideo.muted = true;
+    new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !reduceMotion.matches) spotVideo.play().catch(() => {});
+      else spotVideo.pause();
+    }, { threshold: 0.25 }).observe(spotVideo.parentElement);
   }
 
   /* Felines: the band takes the colour of the hovered or focused piece */
