@@ -11,7 +11,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="preload" href="media/models/hero-character.glb" as="fetch" type="model/gltf-binary" crossorigin>
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script>
   <script src="js/projects.js" defer></script>
   <script src="js/main.js" defer></script>
@@ -39,41 +38,19 @@
     <section class="hero" aria-labelledby="hero-name">
       <div class="wrap">
         <p class="label">3D | Visual Designer · Bangalore</p>
-        <div class="hero__stage">
-          <h1 class="hero__name" id="hero-name"><span class="hero__word">Raycrayon</span></h1>
-          <div class="comic-panel comic-panel--1">
-            <div class="comic-panel__art"><img src="media/stills/hero-panel-pangeo-800.webp" srcset="media/stills/hero-panel-pangeo-800.webp 800w, media/stills/hero-panel-pangeo.webp 1600w" sizes="(min-width: 1560px) 1400px, 100vw" alt="Still from Pangeo, projection mapping for Season One Inc." decoding="async"></div>
-          </div>
-          <div class="comic-panel comic-panel--2">
-            <div class="comic-panel__art"><img src="media/stills/hero-panel-mystery-shack-800.webp" srcset="media/stills/hero-panel-mystery-shack-800.webp 800w, media/stills/hero-panel-mystery-shack.webp 1600w" sizes="(min-width: 1560px) 1400px, 100vw" alt="Still from Mystery Shack, a Gravity Falls tribute" decoding="async"></div>
-          </div>
-          <div class="comic-panel comic-panel--3">
-            <div class="comic-panel__art"><img src="media/stills/hero-panel-0200-800.webp" srcset="media/stills/hero-panel-0200-800.webp 800w, media/stills/hero-panel-0200.webp 1600w" sizes="(min-width: 1560px) 1400px, 100vw" alt="Still from 0200" decoding="async"></div>
-          </div>
-          <div class="comic-panel comic-panel--4">
-            <div class="comic-panel__art"><img src="media/stills/hero-panel-blr-2025-800.webp" srcset="media/stills/hero-panel-blr-2025-800.webp 800w, media/stills/hero-panel-blr-2025.webp 1600w" sizes="(min-width: 1560px) 1400px, 100vw" alt="Still from BLR 2025" decoding="async"></div>
-          </div>
-          <div class="comic-panel comic-panel--5">
-            <div class="comic-panel__art"><img src="media/stills/hero-panel-70emg-800.webp" srcset="media/stills/hero-panel-70emg-800.webp 800w, media/stills/hero-panel-70emg.webp 1080w" sizes="(min-width: 1560px) 1400px, 100vw" alt="Still from 70EMG animation" decoding="async"></div>
-          </div>
-          <div class="comic-panel comic-panel--6">
-            <div class="comic-panel__art"><img src="media/stills/hero-panel-render-house-800.webp" srcset="media/stills/hero-panel-render-house-800.webp 800w, media/stills/hero-panel-render-house.webp 1080w" sizes="(min-width: 1560px) 1400px, 100vw" alt="Still from Render House" decoding="async"></div>
-            <div class="comic-burst" aria-hidden="true">
-              <svg viewBox="-100 -100 200 200" preserveAspectRatio="xMidYMid meet" focusable="false">
-                <polygon points="0,-92 11,-40 45,-78 32,-28 84,-45 42,-10 96,6 40,16 72,55 24,34 26,88 0,40 -20,84 -26,34 -70,62 -40,14 -94,4 -42,-12 -80,-50 -30,-30 -44,-80 -12,-40"/>
-              </svg>
-            </div>
-            <model-viewer class="hero__model"
-              src="media/models/hero-character.glb"
-              poster="media/stills/hero-character.webp"
-              alt="Raycrayon’s signature character: a red, monkey-like 3D figure with green shorts, hands and feet. Press Enter to make it jump out of the panel; drag to turn it."
-              loading="eager" reveal="auto"
-              camera-controls disable-zoom disable-pan disable-tap touch-action="pan-y" interaction-prompt="none"
-              auto-rotate auto-rotate-delay="1500" rotation-per-second="14deg"
-              camera-orbit="0deg 78deg auto"
-              environment-image="neutral" exposure="1.05" shadow-intensity="0.35" shadow-softness="1"><div slot="pan-target" class="hero__model-slot"></div></model-viewer>
-          </div>
-        </div>
+        <h1 class="hero__name" id="hero-name">
+          <button class="hero__word" type="button" aria-describedby="hero-piece">
+            <span class="hero__fill hero__fill--back" aria-hidden="true">Raycrayon</span>
+            <span class="hero__fill hero__fill--front" aria-hidden="true">Raycrayon</span>
+            <span class="visually-hidden">Raycrayon</span>
+            <span class="hero__swatch" aria-hidden="true">
+              <span class="hero__swatch-img"></span>
+              <span class="label hero__swatch-label"></span>
+            </span>
+          </button>
+        </h1>
+        <p class="visually-hidden" id="hero-piece"></p>
+        <svg class="hero__filters" width="0" height="0" aria-hidden="true" focusable="false"><defs></defs></svg>
         <div class="hero__foot">
           <p class="hero__line">3D worlds with a pulse.</p>
           <div class="hero__actions">
@@ -86,9 +63,21 @@
 
     <div id="work">
       <section class="band band--intro" aria-labelledby="work-title">
-        <div class="wrap section-head">
-          <p class="label">Selected work</p>
-          <h2 class="display" id="work-title">Personal projects</h2>
+        <div class="wrap work-intro">
+          <div class="section-head">
+            <p class="label">Selected work</p>
+            <h2 class="display" id="work-title">Personal projects</h2>
+          </div>
+          <div class="spotlight" aria-hidden="true">
+            <model-viewer class="spotlight__model"
+              src="media/models/hero-character.glb"
+              tabindex="-1" loading="lazy" reveal="auto"
+              camera-controls disable-zoom disable-pan disable-tap touch-action="pan-y" interaction-prompt="none"
+              auto-rotate rotation-per-second="10deg"
+              camera-target="-1.52m 4.65m -0.31m" camera-orbit="0deg 82deg 7.7m" field-of-view="25deg"
+              min-camera-orbit="auto 82deg 7.7m" max-camera-orbit="auto 82deg 7.7m"
+              environment-image="media/models/spotlight-env.hdr" exposure="3.2" shadow-intensity="0"><div slot="pan-target" class="spotlight__slot"></div></model-viewer>
+          </div>
         </div>
       </section>
 

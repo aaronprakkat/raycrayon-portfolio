@@ -171,179 +171,106 @@ button { font: inherit; color: inherit; }
   .nav__links { margin-right: -5px; }
 }
 
-/* Hero: a comic-page column of duotoned stills from Ryan's work behind the wordmark.
-   The model rests in the bottom panel and pops out in front of the name (.is-risen). */
+/* Hero: RAYCRAYON as a window. The letters are filled with a duotoned still (accent + off-white, the same
+   screen-then-multiply duotone the site uses elsewhere); hovering, focusing or pressing the word moves on to
+   the next piece. .has-fill is added by main.js only when background-clip: text is supported. */
 .hero .wrap {
   padding-block: clamp(20px, 3vw, 40px) clamp(48px, 6vw, 88px);
-}
-.hero__stage {
-  --ink: #111111;
-  --gap: 12px;
-  --stage-h: clamp(540px, calc(100svh - var(--nav-h) - 190px), 880px);
-  --big-panel: calc((var(--stage-h) - 5 * var(--gap)) * 3.2 / 6.6);
-  --pop: .55s cubic-bezier(.2, .9, .25, 1.15);
-  position: relative;
-  isolation: isolate;
-  /* Sizes inside the hero use cqi (this box's width) rather than vw, which counts the scrollbar and overflowed. */
   container-type: inline-size;
-  display: grid;
-  grid-template-rows: minmax(0, .6fr) minmax(0, .9fr) minmax(0, .5fr) minmax(0, .65fr) minmax(0, .75fr) minmax(0, 3.2fr);
-  gap: var(--gap);
-  height: var(--stage-h);
-  margin-top: 14px;
 }
-
-.comic-panel {
-  --dot: 12px;
-  --shade: 180deg;
-  --focus: 50% 50%;
-  grid-column: 1;
-  position: relative;
-  min-height: 0;
-  border: 4px solid var(--ink);
-  background-color: #FAF8F2;
-}
-/* Duotone: dark → accent, light → off-white. Greyscale still screened over the accent, then multiplied by off-white. */
-.comic-panel__art {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  isolation: isolate;
-  background-color: var(--tint);
-}
-.comic-panel__art img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: var(--focus);
-  mix-blend-mode: screen;
-}
-.comic-panel__art::before,
-.comic-panel__art::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  mix-blend-mode: multiply;
-}
-.comic-panel__art::before { background: #FAF8F2; }
-.comic-panel__art::after {
-  opacity: .6;
-  background-image:
-    radial-gradient(circle, var(--tint) 32%, transparent 34%),
-    radial-gradient(circle, var(--tint) 32%, transparent 34%);
-  background-size: var(--dot) var(--dot);
-  background-position: 0 0, calc(var(--dot) / 2) calc(var(--dot) / 2);
-  -webkit-mask-image: linear-gradient(var(--shade), #000 5%, rgba(0, 0, 0, .25) 95%);
-          mask-image: linear-gradient(var(--shade), #000 5%, rgba(0, 0, 0, .25) 95%);
-}
-.comic-panel--1 { grid-row: 1; --tint: var(--pink);   --dot: 9px;  --shade: 100deg; --focus: 50% 56%; }
-.comic-panel--2 { grid-row: 2; --tint: var(--orange); --dot: 13px; --shade: 250deg; --focus: 45% 22%; }
-.comic-panel--3 { grid-row: 3; --tint: var(--cyan);   --dot: 8px;  --shade: 20deg;  --focus: 30% 38%; }
-.comic-panel--4 { grid-row: 4; --tint: var(--cobalt); --dot: 11px; --shade: 160deg; --focus: 50% 45%; }
-.comic-panel--5 { grid-row: 5; --tint: var(--lime);   --dot: 10px; --shade: 300deg; --focus: 48% 40%; }
-.comic-panel--6 { grid-row: 6; --tint: var(--cobalt); --dot: 15px; --shade: 0deg;   --focus: 50% 42%; }
-
-.comic-panel--3::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(45deg, rgba(17, 17, 17, .6) 0 1.5px, transparent 1.5px 8px),
-    repeating-linear-gradient(-45deg, rgba(17, 17, 17, .4) 0 1px, transparent 1px 11px);
-  -webkit-mask-image: linear-gradient(90deg, transparent 8%, #000 70%);
-          mask-image: linear-gradient(90deg, transparent 8%, #000 70%);
-}
-
-.comic-burst {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: opacity .25s ease;
-}
-.comic-burst::before {
-  content: "";
-  position: absolute;
-  inset: -30%;
-  background: repeating-conic-gradient(from 2deg at 50% 50%, var(--ink) 0deg 1.3deg, transparent 1.3deg 7.5deg);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 16%, #000 34%);
-          mask-image: radial-gradient(circle at 50% 50%, transparent 16%, #000 34%);
-}
-.comic-burst svg {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  width: min(80%, calc(var(--big-panel) * 1.15));
-  translate: -50% -50%;
-  fill: #FAF8F2;
-  stroke: var(--ink);
-  stroke-width: 3;
-  stroke-linejoin: round;
-}
-.hero__stage.is-risen .comic-burst {
-  opacity: 1;
-  animation: comic-burst .5s cubic-bezier(.2, .9, .3, 1.25) both;
-}
-@keyframes comic-burst {
-  from { opacity: 0; transform: scale(.35) rotate(-12deg); }
-  to   { opacity: 1; transform: none; }
-}
-
 .hero__name {
-  position: relative;
-  z-index: 2;
-  grid-area: 4 / 1 / 6 / 2;
-  align-self: end;
-  translate: 0 30%;
-  font: 400 min(calc(100cqi / 3.95), calc(var(--max) / 3.95))/.82 var(--display);
+  margin-top: clamp(12px, 2vw, 28px);
+  font: 400 min(calc(100cqi / 3.95), calc(var(--max) / 3.95))/.84 var(--display);
   letter-spacing: .01em;
-  text-align: center;
   text-transform: uppercase;
+}
+.hero__word {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: center;
+  text-transform: inherit;
+  cursor: pointer;
+}
+.hero__word:focus-visible { outline-offset: 6px; }
+.hero__fill {
+  display: block;
   white-space: nowrap;
+}
+.hero__fill--front {
+  position: absolute;
+  inset: 0 0 auto;
+  opacity: 0;
   pointer-events: none;
 }
-/* White ⇄ black as one word; the ink outline keeps white letters readable over light panel areas. */
-.hero__word {
-  color: #FFFFFF;
-  paint-order: stroke fill;
-  -webkit-text-stroke: .06em var(--ink);
-  pointer-events: auto;
-  transition: color .2s ease, -webkit-text-stroke-color .2s ease;
+/* Duotone: dark → accent, light → #FAF8F2. Chrome ignores background-blend-mode inside text-clipped
+   backgrounds, so the letters use an SVG feColorMatrix filter (one per accent, built in main.js) on the
+   clipped greyscale still; the standalone mobile block uses the CSS blend version. */
+.hero__word.has-fill .hero__fill {
+  background-image: var(--img);
+  background-size: cover;
+  background-position: center;
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: var(--duo);
 }
-.hero__word:hover {
-  color: var(--ink);
-  -webkit-text-stroke-color: #FFFFFF;
+.hero__filters { position: absolute; }
+.hero__swatch-img {
+  background-color: var(--tint);
+  background-image: linear-gradient(#FAF8F2, #FAF8F2), var(--img);
+  background-blend-mode: multiply, screen;
+  background-size: cover;
+  background-position: center;
+}
+.hero__fill--front.is-shown {
+  opacity: 1;
+  transition: opacity .5s var(--ease);
+}
+.hero__swatch { display: none; }
+
+/* At phone size, text-clipped imagery turns to mush: solid ink type, and the still as its own block. */
+@media (max-width: 699px) {
+  .hero__word.has-fill .hero__fill {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: var(--fg);
+    filter: none;
+  }
+  .hero__fill--front { display: none; }
+  .hero__swatch {
+    display: grid;
+    gap: 8px;
+    margin-top: 14px;
+    text-align: left;
+    font: 400 16px/1.4 var(--sans);
+  }
+  .hero__swatch-img {
+    display: block;
+    aspect-ratio: 16 / 5;
+    transition: background-color .4s var(--ease);
+  }
 }
 
-.hero__model {
+.visually-hidden {
   position: absolute;
-  left: 50%;
-  bottom: 4px;
-  z-index: 1;
-  --size: min(calc(var(--big-panel) * 1.3), calc(100cqi - 8px));
-  width: var(--size);
-  height: var(--size);
-  translate: -50% 0;
-  scale: .76;
-  transform-origin: 50% 100%;
-  transition: translate var(--pop), scale var(--pop), z-index 0s .55s;
-  background: transparent;
-  --poster-color: transparent;
-  --progress-bar-color: transparent;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
-.hero__stage.is-risen .hero__model {
-  z-index: 3;
-  translate: -50% -34%;
-  scale: 1;
-  transition: translate var(--pop), scale var(--pop), z-index 0s;
-}
-/* Replaces model-viewer's centre pan marker, which otherwise swallows drags that start at the model's centre. */
-.hero__model-slot { display: none; pointer-events: none; }
-.hero__model:not(:defined) {
-  background: url("../media/stills/hero-character.webp") center / contain no-repeat;
-}
+
 .hero__foot {
   position: relative;
   z-index: 1;
@@ -376,6 +303,39 @@ button { font: inherit; color: inherit; }
   display: grid;
   gap: 14px;
   margin-bottom: clamp(32px, 5vw, 64px);
+}
+
+/* Selected work intro: heading beside a dark "window" where the model turns under one spotlight. */
+.work-intro {
+  display: grid;
+  gap: 24px 48px;
+  align-items: end;
+  margin-bottom: clamp(32px, 5vw, 64px);
+}
+.work-intro .section-head { margin-bottom: 0; }
+.spotlight {
+  position: relative;
+  width: min(100%, 420px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  background:
+    radial-gradient(55% 60% at 50% 30%, rgba(250, 248, 242, .09), transparent 70%),
+    #0B0B0E;
+}
+.spotlight__model {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  --poster-color: transparent;
+  --progress-bar-color: transparent;
+}
+/* model-viewer's centre pan marker otherwise swallows drags that start at the centre. */
+.spotlight__slot { display: none; }
+@media (min-width: 760px) {
+  .work-intro { grid-template-columns: minmax(0, 1fr) minmax(0, 420px); }
+  .spotlight { width: 100%; }
 }
 
 .project-head {

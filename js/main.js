@@ -3,6 +3,12 @@
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
 
+  let lastPointer = 'mouse';
+  document.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType; }, true);
+
+  // url() inside a custom property resolves against the stylesheet, so hand CSS absolute URLs.
+  const cssUrl = (path) => `url("${new URL(path, document.baseURI).href}")`;
+
   let paletteIndex = 0;
   const nextAccent = () => PALETTE[paletteIndex++ % PALETTE.length];
 
@@ -121,43 +127,80 @@
     if (target) fill(target);
   });
 
-  /* Hero model: no auto-rotate under reduced motion */
+  /* Hero: RAYCRAYON as a window onto Ryan's work. Hover, keyboard focus or a press moves on to the next piece;
+     it never reverts, like the button accent cycling. */
 
-  const heroModel = document.querySelector('.hero__model');
-  if (heroModel) {
-    const syncMotion = () => heroModel.toggleAttribute('auto-rotate', !reduceMotion.matches);
-    syncMotion();
-    reduceMotion.addEventListener('change', syncMotion);
+  const heroWord = document.querySelector('.hero__word');
+  if (heroWord && typeof HERO_FILLS !== 'undefined') {
+    const back = heroWord.querySelector('.hero__fill--back');
+    const front = heroWord.querySelector('.hero__fill--front');
+    const swatchImg = heroWord.querySelector('.hero__swatch-img');
+    const swatchLabel = heroWord.querySelector('.hero__swatch-label');
+    const note = document.getElementById('hero-piece');
+    let index = 0;
+    let fadeTimer = null;
+
+    // One duotone filter per accent: luminance 0 → accent, 1 → off-white (#FAF8F2), alpha untouched.
+    const defs = document.querySelector('.hero__filters defs');
+    const filterId = {};
+    for (const accent of new Set(HERO_FILLS.map((p) => p.accent))) {
+      const id = `duo-${accent.slice(1).toLowerCase()}`;
+      const dark = [1, 3, 5].map((i) => parseInt(accent.slice(i, i + 2), 16) / 255);
+      const light = [0xFA, 0xF8, 0xF2].map((v) => v / 255);
+      const rows = dark.map((d, i) => {
+        const k = light[i] - d;
+        return `${(0.2126 * k).toFixed(4)} ${(0.7152 * k).toFixed(4)} ${(0.0722 * k).toFixed(4)} 0 ${d.toFixed(4)}`;
+      });
+      defs.insertAdjacentHTML('beforeend',
+        `<filter id="${id}" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="${rows.join(' ')} 0 0 0 1 0"/></filter>`);
+      filterId[accent] = id;
+    }
+
+    const paint = (el, piece, src) => {
+      el.style.setProperty('--img', cssUrl(src));
+      el.style.setProperty('--tint', piece.accent);
+      el.style.setProperty('--duo', `url(#${filterId[piece.accent]})`);
+    };
+    const showPiece = (piece, animate) => {
+      paint(swatchImg, piece, piece.small);
+      swatchLabel.textContent = piece.title;
+      note.textContent = `Inside the letters: a still from ${piece.title}. Hover, focus or press the name to see the next piece.`;
+      clearTimeout(fadeTimer);
+      if (!animate || reduceMotion.matches) {
+        paint(back, piece, piece.src);
+        front.classList.remove('is-shown');
+        return;
+      }
+      paint(front, piece, piece.src);
+      front.classList.remove('is-shown');
+      void front.offsetWidth;
+      front.classList.add('is-shown');
+      fadeTimer = setTimeout(() => {
+        paint(back, piece, piece.src);
+        front.classList.remove('is-shown');
+      }, 520);
+    };
+    const next = () => {
+      index = (index + 1) % HERO_FILLS.length;
+      showPiece(HERO_FILLS[index], true);
+    };
+
+    if (CSS.supports('(-webkit-background-clip: text) or (background-clip: text)')) heroWord.classList.add('has-fill');
+    showPiece(HERO_FILLS[0], false);
+    addEventListener('load', () => HERO_FILLS.forEach((p) => { new Image().src = p.src; }), { once: true });
+
+    heroWord.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') next(); });
+    heroWord.addEventListener('focus', () => { if (heroWord.matches(':focus-visible')) next(); });
+    heroWord.addEventListener('click', (e) => { if (e.detail === 0 || lastPointer !== 'mouse') next(); });
   }
 
-  /* Hero model pops out of the bottom comic panel: hover on mouse, tap on touch, Enter/Space on keyboard */
+  /* Selected work: the model turns slowly in its spotlight window, except under reduced motion */
 
-  const heroStage = document.querySelector('.hero__stage');
-  const heroPanel = heroStage && heroStage.querySelector('.comic-panel--6');
-  if (heroPanel && heroModel) {
-    const rise = (on) => heroStage.classList.toggle('is-risen', on);
-    const risen = () => heroStage.classList.contains('is-risen');
-    let tapStart = null;
-
-    heroPanel.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') rise(true); });
-    heroPanel.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') rise(false); });
-    heroPanel.addEventListener('pointerdown', (e) => {
-      tapStart = e.pointerType === 'mouse' ? null : { x: e.clientX, y: e.clientY };
-    });
-    heroPanel.addEventListener('pointerup', (e) => {
-      if (!tapStart) return;
-      const moved = Math.hypot(e.clientX - tapStart.x, e.clientY - tapStart.y);
-      tapStart = null;
-      if (moved < 10) rise(!risen());
-    });
-    heroPanel.addEventListener('pointercancel', () => { tapStart = null; });
-
-    heroModel.addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter' && e.key !== ' ') return;
-      e.preventDefault();
-      rise(!risen());
-    });
-    heroModel.addEventListener('blur', () => rise(false));
+  const spotModel = document.querySelector('.spotlight__model');
+  if (spotModel) {
+    const syncMotion = () => spotModel.toggleAttribute('auto-rotate', !reduceMotion.matches);
+    syncMotion();
+    reduceMotion.addEventListener('change', syncMotion);
   }
 
   /* Felines: the band takes the colour of the hovered or focused piece */
@@ -351,12 +394,8 @@
     const previewFrags = gumizoo.querySelector('.gumi-frags--preview');
     const panelFrags = gumiPanel.querySelector('.gumi-frags--panel');
     const more = gumiPanel.querySelector('.gumi-panel__more');
-    let lastPointer = 'mouse';
-    document.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType; }, true);
 
     // A fragment is either a real cut-out ({ src }) or a placeholder crop of the portrait ({ at, zoom, shape }).
-    // url() inside a custom property resolves against the stylesheet, so hand CSS absolute URLs.
-    const cssUrl = (path) => `url("${new URL(path, document.baseURI).href}")`;
     const fragment = (c, f) => {
       const el = h('span', { class: 'gumi-frag', 'data-shape': f.src ? null : f.shape });
       if (f.src) {

@@ -141,6 +141,17 @@ const PROJECTS = [
   },
 ];
 
+// Hero wordmark fill, in rotation order. Crops are greyscale and capped so the letters read as mostly accent;
+// lime and cyan are left out because they're too light to hold the letterforms against the off-white page.
+const HERO_FILLS = [
+  { title: 'Pangeo', accent: '#FF3DAC', src: 'media/stills/hero-fill-pangeo.webp', small: 'media/stills/hero-fill-pangeo-800.webp' },
+  { title: 'Mystery Shack', accent: '#FF5C2B', src: 'media/stills/hero-fill-mystery-shack.webp', small: 'media/stills/hero-fill-mystery-shack-800.webp' },
+  { title: '70EMG', accent: '#3154FF', src: 'media/stills/hero-fill-70emg.webp', small: 'media/stills/hero-fill-70emg-800.webp' },
+  { title: '0200', accent: '#FF3DAC', src: 'media/stills/hero-fill-0200.webp', small: 'media/stills/hero-fill-0200-800.webp' },
+  { title: 'BLR 2025', accent: '#FF5C2B', src: 'media/stills/hero-fill-blr-2025.webp', small: 'media/stills/hero-fill-blr-2025-800.webp' },
+  { title: 'Render House', accent: '#3154FF', src: 'media/stills/hero-fill-render-house.webp', small: 'media/stills/hero-fill-render-house-800.webp' },
+];
+
 // accent is sampled from each character's body in its portrait; bg is the portrait's backdrop, used to fill the display window.
 // bio: PROPOSED COPY pending final approval, not sourced from Ryan (bioDraft: true). Replace once he approves or rewrites it.
 // fragments: small motifs scattered over the hover flood and the detail panel. These are PLACEHOLDERS cropped
