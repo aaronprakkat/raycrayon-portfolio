@@ -488,6 +488,155 @@ button { font: inherit; color: inherit; }
 .card:focus-visible .card__label { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .card:focus-visible .card__meta { color: inherit; }
 
+/* Pangeo bento. Tiles never crop: each media box keeps its file's native ratio (or letterboxes inside a
+   spanned tile). Spans are hand-set per tile role (data-tile in projects.js):
+   row 1: two anchors side by side; rows 2–3: the portrait flagship on the left, the bear trio on the right
+   (one wide lead over two). Projection-mapping details: calibration marks, a static top-down light wash,
+   glowing edge-blend seams in the gutters, and a one-off light sweep on hover. */
+.pangeo-stage {
+  --seam: rgba(244, 240, 223, .1);
+  --mark: rgba(244, 240, 223, .34);
+  position: relative;
+  isolation: isolate;
+}
+.pangeo-stage::before {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--mark), var(--mark)) left top / 16px 1px,
+    linear-gradient(var(--mark), var(--mark)) left top / 1px 16px,
+    linear-gradient(var(--mark), var(--mark)) right top / 16px 1px,
+    linear-gradient(var(--mark), var(--mark)) right top / 1px 16px,
+    linear-gradient(var(--mark), var(--mark)) left bottom / 16px 1px,
+    linear-gradient(var(--mark), var(--mark)) left bottom / 1px 16px,
+    linear-gradient(var(--mark), var(--mark)) right bottom / 16px 1px,
+    linear-gradient(var(--mark), var(--mark)) right bottom / 1px 16px;
+  background-repeat: no-repeat;
+}
+.pangeo-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(75% 60% at 50% -12%, rgba(244, 240, 223, .1), transparent 75%);
+  mix-blend-mode: screen;
+}
+
+.pangeo-grid {
+  --g: 14px;
+  display: grid;
+  gap: var(--g);
+  grid-template-columns: minmax(0, 1fr);
+}
+.pangeo-grid .card {
+  position: relative;
+  box-shadow: 0 0 14px 1px var(--seam);
+  transition: box-shadow .35s var(--ease);
+}
+.pangeo-grid .card__media {
+  background: #050507;
+  isolation: isolate;
+}
+.pangeo-grid .card__media img,
+.pangeo-grid .card__media video {
+  object-fit: contain;
+  transition: opacity .35s var(--ease), filter .35s var(--ease);
+}
+.pangeo-grid .card[data-tile="flagship"] {
+  justify-self: center;
+  width: min(100%, 400px);
+}
+
+/* Hover: one soft light-band sweep across the surface, then Pangeo's pink edge. No label fill here. */
+.pangeo-grid .card__media::after {
+  content: "";
+  position: absolute;
+  inset: -10% auto -10% 0;
+  z-index: 1;
+  width: 45%;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent, rgba(244, 240, 223, .32) 50%, transparent);
+  transform: translateX(-120%);
+}
+.pangeo-grid .card:is(:hover, :focus-visible) .card__media::after {
+  animation: pangeo-sweep .9s cubic-bezier(.3, .1, .3, 1) 1;
+}
+@keyframes pangeo-sweep {
+  0% { opacity: 0; transform: translateX(-120%); }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(330%); }
+}
+.pangeo-grid .card:is(:hover, :focus-visible) {
+  box-shadow: 0 0 16px 2px rgba(255, 61, 172, .32);
+}
+.pangeo-grid .card:is(:hover, :focus-visible) .card__media {
+  box-shadow: inset 0 0 0 1px #FF3DAC;
+}
+.pangeo-grid .card:is(:hover, :focus-visible) .card__media :is(img, video) { filter: brightness(1.08); }
+.pangeo-grid .card:is(:hover, :focus-visible) .card__label {
+  background: transparent;
+  border-color: var(--line);
+  color: inherit;
+  box-shadow: inset 0 -2px 0 #FF3DAC;
+}
+.pangeo-grid .card:is(:hover, :focus-visible) .card__meta { color: var(--muted); }
+
+@media (min-width: 760px) {
+  .pangeo-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .pangeo-grid .card[data-tile="anchor"] { grid-column: span 6; }
+  .pangeo-grid .card[data-tile="flagship"] {
+    grid-column: 1 / span 4;
+    grid-row: 2 / span 2;
+    justify-self: stretch;
+    display: flex;
+    flex-direction: column;
+    width: auto;
+  }
+  /* The flagship fills the height of the bear rows beside it and letterboxes its video inside (no crop). */
+  .pangeo-grid .card[data-tile="flagship"] .card__media {
+    flex: 1;
+    min-height: 0;
+    aspect-ratio: auto !important;
+  }
+  .pangeo-grid .card[data-tile="bear-lead"] { grid-column: 5 / -1; grid-row: 2; }
+  .pangeo-grid .card[data-tile="bear"] { grid-column: span 4; grid-row: 3; }
+
+  /* Registration crosses at three gutter junctions. */
+  .pangeo-grid .card[data-tile="anchor"]:first-child::before,
+  .pangeo-grid .card[data-tile="flagship"]::before,
+  .pangeo-grid .card[data-tile="bear-lead"]::before {
+    content: "";
+    position: absolute;
+    z-index: 3;
+    width: 15px;
+    height: 15px;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--mark, rgba(244, 240, 223, .34)), var(--mark, rgba(244, 240, 223, .34))) center / 100% 1px no-repeat,
+      linear-gradient(var(--mark, rgba(244, 240, 223, .34)), var(--mark, rgba(244, 240, 223, .34))) center / 1px 100% no-repeat;
+  }
+  .pangeo-grid .card[data-tile="anchor"]:first-child::before {
+    right: calc(var(--g) / -2);
+    bottom: calc(var(--g) / -2);
+    translate: 50% 50%;
+  }
+  .pangeo-grid .card[data-tile="flagship"]::before {
+    right: calc(var(--g) / -2);
+    top: calc(var(--g) / -2);
+    translate: 50% -50%;
+  }
+  .pangeo-grid .card[data-tile="bear-lead"]::before {
+    left: 50%;
+    bottom: calc(var(--g) / -2);
+    translate: -50% 50%;
+  }
+}
+
 /* Gumizoo: display window + roster. Hovering/focusing (or tapping) a row crossfades the display to that
    character and floods the section's surrounding space with its accent (.is-flooded). */
 .gumizoo {

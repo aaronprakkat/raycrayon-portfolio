@@ -50,6 +50,7 @@
       type: 'button',
       class: 'card',
       'data-slug': p.slug,
+      'data-tile': p.tile,
       'aria-haspopup': 'dialog',
       'aria-label': p.meta ? `${p.title}, ${p.meta}` : p.title,
     });
@@ -57,6 +58,7 @@
 
     const media = h('span', { class: 'card__media' });
     media.style.aspectRatio = p.ratio;
+    card.style.setProperty('--ratio', p.ratio);
     const image = p.poster || p.still;
     if (image) {
       media.append(h('img', { src: image, alt: p.alt, loading: 'lazy', decoding: 'async' }));

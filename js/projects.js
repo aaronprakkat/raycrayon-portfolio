@@ -97,13 +97,39 @@ const PROJECTS = [
     slug: 'pangeo-pride', group: 'pangeo', title: 'Pride', meta: 'Pangeo', accent: '#FF3DAC', ratio: '16 / 9',
     loop: 'media/loops/pangeo-pride.mp4', poster: 'media/posters/pangeo-pride.jpg',
     alt: 'Pride: collaged bands of a sunlit god, chameleons, fish and palms across a classical arcade',
-    film: '', year: '', role: 'Projection mapping artist', context: 'Season One Inc.',
+    film: '', year: '', role: 'Projection mapping artist', context: 'Season One Inc.', tile: 'anchor',
   },
   {
     slug: 'pangeo-lust', group: 'pangeo', title: 'Lust', meta: 'Pangeo', accent: '#FF3DAC', ratio: '16 / 9',
     loop: 'media/loops/pangeo-lust.mp4', poster: 'media/posters/pangeo-lust.jpg',
     alt: 'Lust: a pineapple shrine framed by snakes and fluted columns in violet light',
-    film: '', year: '', role: 'Projection mapping artist', context: 'Season One Inc.',
+    film: '', year: '', role: 'Projection mapping artist', context: 'Season One Inc.', tile: 'anchor',
+  },
+  // tile: grid position in the Pangeo bento (see .pangeo-grid in style.css). ratio is each file's native shape;
+  // tiles never crop, so a new ratio only changes letterboxing, not the layout.
+  {
+    slug: 'pangeo-valentine', group: 'pangeo', title: 'Valentine', meta: 'Pangeo', accent: '#FF3DAC', ratio: '9 / 16',
+    loop: 'media/loops/pangeo-valentine.mp4', poster: 'media/posters/pangeo-valentine.jpg',
+    alt: 'Valentine’s visuals: three stacked scenes titled Eros, Philia and Ludus in hot pink, red and violet',
+    film: '', year: '', role: 'Projection mapping artist', context: 'Eros, Philia and Ludus. Season One Inc.', tile: 'flagship',
+  },
+  {
+    slug: 'pangeo-blue-bear', group: 'pangeo', title: 'Blue bear', meta: 'Pangeo', accent: '#FF3DAC', ratio: '16 / 9',
+    loop: 'media/loops/pangeo-blue-bear.mp4', poster: 'media/posters/pangeo-blue-bear.jpg',
+    alt: 'Bear colour study: glossy blue gummy bears tumbling through pink and white striped bands',
+    film: '', year: '', role: 'Projection mapping artist', context: 'Bear colour study. Season One Inc.', tile: 'bear-lead',
+  },
+  {
+    slug: 'pangeo-colour-bear-1', group: 'pangeo', title: 'Colour bear 1', meta: 'Pangeo', accent: '#FF3DAC', ratio: '16 / 9',
+    loop: 'media/loops/pangeo-colour-bear-1.mp4', poster: 'media/posters/pangeo-colour-bear-1.jpg',
+    alt: 'Bear colour study: a pale bear face inside a violet mandala ring on bright blue',
+    film: '', year: '', role: 'Projection mapping artist', context: 'Bear colour study. Season One Inc.', tile: 'bear',
+  },
+  {
+    slug: 'pangeo-colour-bear-4', group: 'pangeo', title: 'Colour bear 4', meta: 'Pangeo', accent: '#FF3DAC', ratio: '16 / 9',
+    loop: 'media/loops/pangeo-colour-bear-4.mp4', poster: 'media/posters/pangeo-colour-bear-4.jpg',
+    alt: 'Bear colour study: pale blue gummy bears and a checkered block on sweeping pink ribbons',
+    film: '', year: '', role: 'Projection mapping artist', context: 'Bear colour study. Season One Inc.', tile: 'bear',
   },
   {
     slug: 'mystery-shack', group: 'mystery-shack', title: 'Mystery Shack', meta: 'Tribute', accent: '#FF5C2B', ratio: '16 / 9',
