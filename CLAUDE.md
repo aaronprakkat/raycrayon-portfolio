@@ -68,7 +68,7 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
 
 1. **Nav:** RAYCRAYON wordmark left. Work, About, Contact right.
 2. **Hero:** eyebrow line, then RAYCRAYON at full content width (~98%, sized with `100cqi / 3.55`), then the tagline and two buttons.
-   - The wordmark sits on the plain background with no box or outline. Its letters are filled with a duotoned still (accent + `#FAF8F2`) cycling Pangeo, Mystery Shack, 70EMG, 0200, BLR 2025, Render House on hover/focus/press; it never reverts. Accents: pink, orange, cobalt only (lime and cyan are too light to hold letterforms).
+   - The wordmark sits on the plain background with no box or outline. Its letters are filled with a duotoned still (accent + `#FAF8F2`) cycling Pangeo, Mystery Shack, 70EMG, 0200, BLR 2025, Render House on hover/focus/press; it never reverts. Accents: pink, orange, cobalt, plus same-hue stand-ins for lime (`#69A300`, on 0200) and cyan (`#16A19E`, on BLR 2025). The true lime and cyan are too light to hold letterforms, so the stand-ins are darkened only to orange's contrast level (~2.9:1 against the page).
    - Two renderers, same look at rest:
      - **WebGL** (`js/hero-ripple.js`, desktop 700px+ with WebGL and no reduced motion): a canvas over the text's line box, clipped to the letters by the SVG `#wordmark-clip`. The clip redraws the word at the same font size and measured baseline. The shader applies the same duotone math as the CSS filter.
      - **CSS fallback** (no WebGL, or reduced motion): `background-clip: text` with an SVG `feColorMatrix` filter per accent. Swaps are instant.
