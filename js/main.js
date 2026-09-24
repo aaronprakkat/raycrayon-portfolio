@@ -199,6 +199,26 @@
     if (target) fill(target);
   });
 
+  /* Contact: copy the email for visitors with no mail app. Only shown where the clipboard API exists. */
+
+  const copyBtn = document.querySelector('.contact__copy');
+  if (copyBtn && navigator.clipboard && window.isSecureContext) {
+    const status = copyBtn.nextElementSibling;
+    let reset;
+    copyBtn.hidden = false;
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(copyBtn.dataset.copy).then(() => {
+        copyBtn.textContent = 'Copied';
+        status.textContent = 'Email address copied';
+        clearTimeout(reset);
+        reset = setTimeout(() => {
+          copyBtn.textContent = 'Copy email';
+          status.textContent = '';
+        }, 2000);
+      });
+    });
+  }
+
   /* Hero: RAYCRAYON as a window onto Ryan's work. Hover, keyboard focus or a press moves on to the next piece;
      it never reverts, like the button accent cycling. On desktop with WebGL (and no reduced motion) the letters
      are a WebGL canvas (js/hero-ripple.js) that ripples under the cursor and melts into the next piece; otherwise

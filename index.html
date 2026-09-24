@@ -186,11 +186,11 @@
 
     <section class="band band--rule" id="about" aria-labelledby="about-title">
       <div class="wrap">
-        <div class="section-head">
-          <p class="label">About</p>
-          <h2 class="display" id="about-title">Ryan Abraham Thomas</h2>
-        </div>
         <div class="about">
+          <div class="section-head about__head">
+            <p class="label">About</p>
+            <h2 class="display about__name js-accent" id="about-title" tabindex="0">Ryan Abraham Thomas</h2>
+          </div>
           <figure class="about__photo">
             <img src="media/stills/about-headshot.jpg" width="828" height="1035" alt="Portrait of Ryan Abraham Thomas" loading="lazy" decoding="async">
           </figure>
@@ -218,10 +218,24 @@
     <section class="band band--rule contact" id="contact" aria-labelledby="contact-title">
       <div class="wrap">
         <h2 class="label" id="contact-title">Contact</h2>
-        <a class="contact__email js-fill" href="mailto:ryanabrahamthomas@gmail.com">ryanabrahamthomas@<wbr>gmail.com</a>
-        <p class="contact__links">
-          <a class="pill js-fill" href="https://www.instagram.com/raycrayon_" rel="noopener">Instagram @raycrayon_</a>
-        </p>
+        <p class="contact__lead">Follow along, or say hello.</p>
+        <ul class="contact__list">
+          <li class="contact__row">
+            <a class="contact__link js-fill" href="https://www.instagram.com/raycrayon_" rel="noopener">
+              <svg class="contact__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2.3" y="2.3" width="19.4" height="19.4" rx="5.6"/><circle cx="12" cy="12" r="4.5"/><circle class="contact__icon-dot" cx="17.6" cy="6.4" r="1.25"/></svg>
+              <span><span class="visually-hidden">Instagram </span>@raycrayon_</span>
+            </a>
+          </li>
+          <li class="contact__row">
+            <a class="contact__link js-fill" href="mailto:ryanabrahamthomas@gmail.com">
+              <svg class="contact__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2.3" y="4.3" width="19.4" height="15.4" rx="2.4"/><path d="M3 6.2l9 6.6 9-6.6"/></svg>
+              <span><span class="visually-hidden">Email </span>ryanabrahamthomas<span class="contact__domain">@gmail.com</span></span>
+            </a>
+            <button class="pill js-fill contact__copy" type="button" data-copy="ryanabrahamthomas@gmail.com" hidden>Copy email</button>
+            <span class="visually-hidden" aria-live="polite"></span>
+          </li>
+        </ul>
+        <p class="label">Based in Bangalore, India</p>
       </div>
     </section>
   </main>

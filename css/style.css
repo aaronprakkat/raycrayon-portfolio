@@ -1094,6 +1094,30 @@ button { font: inherit; color: inherit; }
   text-transform: uppercase;
   transition: background-color .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
 }
+/* Name heading: a thin tick in the cycled accent (--fill, set by the shared .js-accent handler) draws in
+   beneath it on hover/focus. Focusable like the hero tagline so keyboard users get the same moment. */
+.about__name {
+  position: relative;
+  justify-self: start;
+  cursor: default;
+}
+.about__name::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -.1em;
+  height: 4px;
+  background: var(--fill);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .35s var(--ease);
+}
+@media (hover: hover) {
+  .about__name:hover::after { transform: scaleX(1); }
+}
+.about__name:focus-visible::after { transform: scaleX(1); }
+
 .about__photo {
   grid-area: photo;
   width: min(100%, 320px);
@@ -1103,34 +1127,83 @@ button { font: inherit; color: inherit; }
   overflow: hidden;
 }
 .about__photo img { width: 100%; height: 100%; object-fit: cover; }
-.about { grid-template-areas: "photo" "bio" "lists"; }
+.about { grid-template-areas: "head" "photo" "bio" "lists"; }
+.about > .about__head { grid-area: head; margin-bottom: 0; }
 .about__bio { grid-area: bio; }
 .about__lists { grid-area: lists; }
 @media (min-width: 900px) {
   .about {
     grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    grid-template-areas: "bio photo" "bio lists";
+    grid-template-areas: "head head" "bio photo" "bio lists";
   }
   .about__photo { width: 100%; max-width: 320px; }
 }
 @media (min-width: 1100px) {
   .about {
-    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 280px);
-    grid-template-areas: "bio lists photo";
-    gap: 40px 56px;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, .95fr);
+    grid-template-areas: "head head head" "bio lists photo";
+    gap: clamp(32px, 5vw, 64px) 56px;
   }
+  .about__photo { max-width: none; }
+}
+/* Wide desktop: the photo runs the full height of the section, from the top of the heading to the end of the
+   bio/tags, cropped (cover) to that height. The image is taken out of flow so its own size never stretches
+   the rows, and the heading scales to fit the two left columns on one line. Below 1240px the columns are too
+   narrow (tall text, thin photo), so the photo stays 4:5 beside the tags. */
+@media (min-width: 1240px) {
+  .about { grid-template-areas: "head head photo" "bio lists photo"; }
+  .about__head { container-type: inline-size; }
+  .about__name { font-size: min(144px, 100cqi / 7.4); }
+  /* Top edge lines up with the heading, below the small "About" label. */
+  .about__photo { position: relative; aspect-ratio: auto; margin-top: calc(12px * 1.4 + 14px); }
+  .about__photo img { position: absolute; inset: 0; }
 }
 
 /* Contact */
+/* Instagram first, then email: two matching rows, same display size, an icon each, split by hairlines.
+   The size is set so the (longer) email line fits the row, icon included. */
 .contact .wrap { display: grid; gap: 28px; justify-items: start; container-type: inline-size; }
-.contact__email {
-  margin-left: -.08em;
-  padding: .08em .08em 0;
-  font: 400 min(calc(100cqi / 11.8), calc(var(--max) / 11.8))/.95 var(--display);
+.contact__lead {
+  font: 600 clamp(17px, 2.2vw, 28px)/1.2 var(--sans);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.contact__list {
+  justify-self: stretch;
+  border-top: 1px solid var(--line);
+  font-size: min(100cqi / 13.2, 76px);
+}
+.contact__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  padding-block: .22em;
+  border-bottom: 1px solid var(--line);
+}
+.contact__link {
+  display: inline-flex;
+  align-items: center;
+  gap: .3em;
+  margin-left: -.1em;
+  padding: .1em .12em 0 .1em;
+  font: 400 1em/1 var(--display);
   text-transform: uppercase;
   text-decoration: none;
   transition: background-color .25s var(--ease), color .25s var(--ease);
 }
+/* Single-colour glyphs in the text colour, stroke weight matched to Bebas stems; never the brand gradient. */
+.contact__icon {
+  flex: none;
+  width: .74em;
+  height: .74em;
+  margin-bottom: .1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.3;
+  stroke-linejoin: round;
+}
+.contact__icon-dot { fill: currentColor; stroke: none; }
 
 /* Footer */
 .footer .wrap {
@@ -1461,8 +1534,14 @@ html { -webkit-tap-highlight-color: transparent; }
 
   .nav__brand { min-height: 44px; }
   .hero__line-text { display: inline-block; padding-block: .26em .28em; }
-  .contact__email { display: inline-block; min-height: 44px; padding-block: .2em .1em; }
-  .contact__links .pill { min-height: 48px; }
+  .contact__link { min-height: 48px; }
+  .contact__row { padding-block: 10px; }
+  .contact__row .pill { min-height: 48px; }
+  /* Phones: the email breaks before @gmail.com so both rows can share a much larger size. */
+  .contact__list { font-size: min(100cqi / 8.6, 56px); }
+  .contact__link { align-items: flex-start; line-height: 1.02; }
+  .contact__icon { margin: .06em 0 0; }
+  .contact__domain { display: block; }
 
   .card__meta,
   .clip-nav__count { font-size: 12px; }

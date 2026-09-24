@@ -48,6 +48,7 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
    - On desktop with WebGL, the letters are a WebGL canvas: the image ripples under a moving cursor, and each swap melts outward from where it was triggered (from the centre on keyboard focus).
    - The render loop only runs while the cursor moves or a swap is in progress, and never while the wordmark is off-screen.
 2. **Buttons, nav links, tagline and tags:** fill with a different accent each time they are hovered or focused (cycle through the palette, one shared handler via `.js-fill` / `.js-accent`). The hero buttons use the grainy gradient version of the fill.
+   - **About name accent:** the "Ryan Abraham Thomas" heading (`.about__name.js-accent`, `tabindex="0"`, visible focus like the hero tagline) gets a thin 4px tick in the next accent, drawing in beneath it on hover/focus. At rest: plain ink heading, no underline. Reduced motion: same colour, appears instantly.
 3. **Project cards:** on hover the poster swaps to its muted loop and the title label fills with that project's accent. On touch devices, no hover: tap opens the player.
    - **Multi-clip cards** (a `clips` list in `js/projects.js`): the card shows one active clip, clip 1 by default. Previous/Next arrow buttons and a "2 / 4" counter sit in a slim bar over the bottom of the media: revealed on hover/focus on desktop, always visible on touch.
    - Arrows swap the active clip's poster and loop with a crossfade (instant under reduced motion), wrap at both ends, and never open anything. A polite live region announces "Clip 2 of 4: <label>".
@@ -84,8 +85,8 @@ Single-page portfolio for Ryan Abraham Thomas ("Raycrayon"), a 3D and visual des
    - More personal work: 0200, BLR 2025, Render House (still), Mystery Shack (Gravity Falls tribute)
 4. **Client work:** ASTERISK (4 clips: video + 3 concept stills), 70EMG (4 clips), Funk House Media (3 clips). All use the multi-clip card pattern; still clips have no hover loop and open as an image in the player.
 5. **Experience:** from the CV below, as a vertical roadmap whose nodes light once, in crayon-box order, as entries scroll in.
-6. **About and tools:** short bio, skills, software (tags use the accent cycling), and the headshot `media/stills/about-headshot.jpg` (alt "Portrait of Ryan Abraham Thomas") in a 4:5 hairline frame, `object-fit: cover`. It sits right of the tags on desktop, above them on tablet, first on phones.
-7. **Contact:** large email link and Instagram. No phone number.
+6. **About and tools:** short bio, skills, software (tags use the accent cycling), and the headshot `media/stills/about-headshot.jpg` (alt "Portrait of Ryan Abraham Thomas") in a 4:5 hairline frame, `object-fit: cover`. The name heading reacts to hover/focus (see Interactions 2). On wide desktop (1240px+) it sits right of the heading and tags, running from the top of the name heading to the end of the bio/tags (cropped to fit, 56px gap); from 1100px it sits right of the tags at 4:5, above them on tablet, first on phones.
+7. **Contact:** a tagline-style line "Follow along, or say hello.", then two matching rows split by hairlines, Instagram first (it matters more than email for this profile): `@raycrayon_` and the email, both in Bebas at the same size (sized so the email fits), each with a single-colour inline-SVG icon (Instagram glyph, envelope; text colour, never brand colours). The email row ends with a "Copy email" pill (hidden where the clipboard API is unavailable; announces via a polite live region). Under 700px the email breaks before `@gmail.com` so both rows can be larger. Then a "Based in Bangalore, India" label. No phone number.
 
 ## Content
 
