@@ -1,4 +1,5 @@
 :root {
+  --gumi-ar: 770 / 606; /* Gumizoo head renders: shared crop aspect, see the build note in CLAUDE.md */
   --bg: #FAF8F2;
   --fg: #111111;
   --muted: #6B6B6B;
@@ -762,46 +763,22 @@ button { font: inherit; color: inherit; }
   }
 }
 
-/* Gumizoo: display window + roster. Hovering/focusing (or tapping) a row crossfades the display to that
-   character and floods the section's surrounding space with its accent (.is-flooded). */
+/* Gumizoo: heading, a 2×2 grid of the four heads (Blender renders, see main.js) and the event poster beside it.
+   Hovering/focusing a tile lifts its head out of the frame, shows its name, floods that one tile with its
+   accent and turns the heading that accent (--title-accent, set by main.js). The section itself never floods. */
 .gumizoo {
   position: relative;
-  isolation: isolate;
-  transition: color .4s var(--ease);
+  container-type: inline-size;
 }
-.gumizoo__flood {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  pointer-events: none;
-  opacity: 0;
-  background-color: var(--flood, transparent);
-  background-image:
-    radial-gradient(110% 80% at 15% 0%, color-mix(in oklab, var(--flood, #FAF8F2), white 26%), transparent 60%),
-    radial-gradient(90% 70% at 100% 100%, color-mix(in oklab, var(--flood, #FAF8F2), black 20%), transparent 65%);
-  transition: opacity .5s var(--ease), background-color .4s var(--ease);
-}
-.gumizoo__flood::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--grain);
-  opacity: .38;
-  mix-blend-mode: soft-light;
-}
-.gumizoo.is-flooded .gumizoo__flood { opacity: 1; }
-.gumizoo.is-flooded {
-  --fg: var(--on-flood);
-  --muted: var(--on-flood);
-  --line: color-mix(in srgb, var(--on-flood) 28%, transparent);
-  color: var(--on-flood);
+.gumizoo .project-title {
+  color: var(--title-accent, #111111);
+  transition: color .3s var(--ease);
 }
 
-/* Fragments: small motifs scattered on the flood and the detail panel. Slots (below) set position and size;
-   the data only says which image and crop fills each one, so real PNG cut-outs can replace the crops. */
+/* Fragments: small motifs scattered on the detail panel. Slots (below) set position and size; the data only
+   says which image and crop fills each one, so real PNG cut-outs can replace the crops. */
 .gumi-frags {
-  position: absolute;
+  position: fixed;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
@@ -810,7 +787,7 @@ button { font: inherit; color: inherit; }
   position: absolute;
   width: var(--s, 72px);
   aspect-ratio: 1;
-  opacity: .6;
+  opacity: .7;
   rotate: var(--r, 0deg);
   background: var(--frag-img) var(--frag-pos, center) / var(--frag-size, contain) no-repeat;
 }
@@ -819,14 +796,6 @@ button { font: inherit; color: inherit; }
   clip-path: polygon(50% 0, 61% 32%, 95% 22%, 71% 50%, 95% 78%, 61% 68%, 50% 100%, 39% 68%, 5% 78%, 29% 50%, 5% 22%, 39% 32%);
 }
 .gumi-frag[data-shape="tooth"] { clip-path: polygon(8% 12%, 92% 12%, 50% 96%); }
-
-.gumi-frags--preview .gumi-frag:nth-child(1) { top: 3%;  left: 34%;  --s: 64px; --r: -14deg; }
-.gumi-frags--preview .gumi-frag:nth-child(2) { top: 1%;  right: 4%;  --s: 84px; --r: 10deg; }
-.gumi-frags--preview .gumi-frag:nth-child(3) { bottom: 2%; left: 6%;  --s: 72px; --r: 18deg; }
-.gumi-frags--preview .gumi-frag:nth-child(4) { bottom: 3%; right: 36%; --s: 56px; --r: -8deg; }
-
-.gumi-frags--panel { position: fixed; }
-.gumi-frags--panel .gumi-frag { opacity: .7; }
 .gumi-frags--panel .gumi-frag:nth-child(1) { top: 6%;  left: 4%;   --s: 150px; --r: -12deg; }
 .gumi-frags--panel .gumi-frag:nth-child(2) { top: 3%;  left: 44%;  --s: 96px;  --r: 16deg; }
 .gumi-frags--panel .gumi-frag:nth-child(3) { top: 14%; right: 12%; --s: 132px; --r: -6deg; }
@@ -836,172 +805,178 @@ button { font: inherit; color: inherit; }
 .gumi-frags--panel .gumi-frag:nth-child(7) { bottom: 8%; left: 52%; --s: 92px;  --r: 12deg; }
 .gumi-frags--panel .gumi-frag:nth-child(8) { bottom: 2%; right: 16%; --s: 118px; --r: -10deg; }
 
+/* Spacing is the brand grid's gutter (24px desktop, 12px phone) for both the tile gaps and the grid-to-poster
+   gap. Frames: a 2px ink border and a soft shadow, the same on all four tiles and the poster. */
 .gumizoo__grid {
+  --gutter-grid: 12px;
+  --frame-border: 2px solid rgba(17, 17, 17, .78);
+  --frame-shadow: 0 1px 2px rgba(0, 0, 0, .08), 0 14px 26px -10px rgba(0, 0, 0, .3);
   display: grid;
-  gap: 28px 40px;
-  grid-template-areas: "intro" "display" "roster";
+  gap: 24px var(--gutter-grid);
+  grid-template-areas: "head" "tiles" "poster";
 }
-.gumizoo__intro {
-  grid-area: intro;
-  display: grid;
-  gap: 14px;
-  align-content: start;
-}
-.gumizoo__intro p:not(.label) { max-width: 44ch; }
+.gumizoo__head { grid-area: head; display: grid; gap: 14px; }
 
-.gumizoo__display {
-  grid-area: display;
+.gumizoo__tiles {
+  grid-area: tiles;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gutter-grid);
+}
+.gumizoo__tiles li:nth-child(odd) { --tilt: -5deg; }
+.gumizoo__tiles li:nth-child(even) { --tilt: 4deg; }
+/* Tile texture: one grainy-gradient stack that goes from quiet to bold. At rest a light neutral gradient with a
+   grain that reads on its own; on hover/focus the accent gradient fades in underneath the same grain. */
+.gumi-tile {
   position: relative;
-  justify-self: center;
-  width: min(100%, 420px);
-  aspect-ratio: 9 / 16;
-  overflow: hidden;
-  /* The caption grows when its text changes; without this, scroll anchoring shifts the page mid-tap. */
-  overflow-anchor: none;
-  background: #111111;
-}
-.gumizoo__layer {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: var(--layer-bg, transparent);
-  opacity: 0;
-  transition: opacity .45s var(--ease);
-}
-.gumizoo__layer.is-active { opacity: 1; }
-.gumizoo__layer img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.gumizoo__layer--poster img { object-fit: cover; }
-
-.gumizoo__caption {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
-  z-index: 1;
-  display: grid;
-  gap: 6px;
-  padding: 16px 18px 14px;
-  overflow: hidden;
   isolation: isolate;
-  color: var(--on-accent);
-  background-color: var(--accent, #111111);
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: var(--frame-border);
+  background-color: #F6F3EB;
   background-image:
-    radial-gradient(110% 90% at 10% 0%, color-mix(in oklab, var(--accent, #111111), white 26%), transparent 62%),
-    radial-gradient(90% 80% at 100% 100%, color-mix(in oklab, var(--accent, #111111), black 22%), transparent 65%);
-  opacity: 0;
-  translate: 0 12px;
-  transition: opacity .3s var(--ease), translate .3s var(--ease);
+    radial-gradient(120% 110% at 14% 0%, #FFFFFF, transparent 62%),
+    radial-gradient(100% 100% at 100% 100%, #E4DFD3, transparent 66%);
+  box-shadow: var(--frame-shadow);
+  color: inherit;
+  cursor: pointer;
 }
-.gumizoo__caption::before {
+.gumi-tile::before,
+.gumi-tile::after {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: -1;
+  pointer-events: none;
+}
+.gumi-tile::before {
+  z-index: 0;
+  background-color: var(--accent);
+  background-image:
+    radial-gradient(120% 110% at 14% 0%, color-mix(in oklab, var(--accent), white 32%), transparent 62%),
+    radial-gradient(100% 100% at 100% 100%, color-mix(in oklab, var(--accent), black 22%), transparent 66%);
+  opacity: 0;
+  transition: opacity .35s var(--ease);
+}
+.gumi-tile::after {
+  z-index: 1;
   background-image: var(--grain);
-  opacity: .38;
-  mix-blend-mode: soft-light;
+  opacity: .42;
+  mix-blend-mode: multiply;
+  transition: opacity .35s var(--ease);
 }
-.gumizoo__display.is-previewing .gumizoo__caption { opacity: 1; translate: 0 0; }
-.gumizoo__caption-name {
-  font: 400 clamp(30px, 3vw, 40px)/.9 var(--display);
-  text-transform: uppercase;
-}
-.gumizoo__caption-trait { font: 500 14px/1.35 var(--sans); }
-
-.gumizoo__roster {
-  grid-area: roster;
-  display: grid;
-  gap: 14px;
-  align-content: start;
-}
-.gumizoo__tagline {
-  font: 400 clamp(28px, 3vw, 36px)/.95 var(--display);
-  text-transform: uppercase;
-}
-.gumizoo__list { border-top: 1px solid var(--line); }
-.gumizoo__row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-  padding: 10px 12px 10px 14px;
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  background: transparent;
-  box-shadow: inset 5px 0 0 var(--accent);
-  text-align: left;
-  cursor: pointer;
-  transition: background-color .25s var(--ease);
-}
+.gumi-tile:focus-visible::before { opacity: 1; }
+.gumi-tile:focus-visible::after { opacity: .5; }
 @media (hover: hover) {
-  .gumizoo__row:hover { background-color: color-mix(in oklab, var(--accent) 14%, transparent); }
+  .gumi-tile:hover::before { opacity: 1; }
+  .gumi-tile:hover::after { opacity: .5; }
 }
-.gumizoo__row:focus-visible { background-color: color-mix(in oklab, var(--accent) 14%, transparent); outline-offset: -2px; }
-.gumizoo__chip {
-  position: relative;
-  flex: none;
-  width: 56px;
-  height: 56px;
-  padding: 3px;
-  background: var(--accent);
-}
-.gumizoo__chip img { width: 100%; height: 100%; object-fit: cover; }
-.gumizoo__play {
+/* The head render is cropped tight and normalised (same front width and centre for all four), so one rule
+   places every head identically: 95% of the frame's width, centred. */
+.gumi-tile__head {
   position: absolute;
-  right: -6px;
-  bottom: -6px;
-  width: 22px;
-  height: 22px;
-  fill: #FAF8F2;
-  stroke: #111111;
-  stroke-width: 1.5;
-  stroke-linejoin: round;
-}
-.gumizoo__row-name {
-  flex: 1;
-  font: 400 clamp(26px, 2.6vw, 34px)/1 var(--display);
-  letter-spacing: .01em;
-  text-transform: uppercase;
-  padding-top: 3px;
-}
-.gumizoo__row-surname { color: var(--accent); }
-.gumizoo__row-trait {
-  font: 500 12px/1.3 var(--sans);
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  text-align: right;
-}
-@media (max-width: 480px) {
-  .gumizoo__row-trait { display: none; }
+  inset: 2.5%;
+  width: 95%;
+  height: 95%;
+  z-index: 2;
+  object-fit: contain;
+  transform-origin: 50% 60%;
+  transition: transform .45s var(--ease), filter .45s var(--ease);
 }
 
-/* On the flood, rows sit on paper so names, accent surnames and traits stay legible on any accent. */
-.gumizoo.is-flooded .gumizoo__list { border-top-color: transparent; }
-.gumizoo.is-flooded .gumizoo__row {
-  --muted: #5E5E5E;
-  color: #111111;
-  background-color: #FAF8F2;
-  border-bottom-color: rgba(17, 17, 17, .12);
+/* Nameplate: a chunky toy-shop sticker (accent fill, ink outline and hard offset shadow) that pops up centred
+   over the head, tilted, bouncing in with a wobble. Always shown on touch, where there's no hover. */
+.gumi-tile__name {
+  position: absolute;
+  left: 50%;
+  top: 70%;
+  z-index: 3;
+  display: grid;
+  justify-items: center;
+  width: max-content;
+  max-width: 92%;
+  padding: .16em .34em .06em;
+  border: 3px solid #111111;
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 4px 5px 0 #111111;
+  font: 400 clamp(30px, 4.4vw, 60px)/.84 var(--display);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  translate: -50% -50%;
+  rotate: var(--tilt, -4deg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s var(--ease);
 }
-.gumizoo.is-flooded .gumizoo__row:is(:hover, :focus-visible) {
-  background-color: color-mix(in oklab, var(--accent) 16%, #FAF8F2);
+.gumi-tile__name span { font-size: .6em; letter-spacing: .06em; }
+@keyframes gumi-plate-pop {
+  0%   { opacity: 0; scale: .35; rotate: calc(var(--tilt, -4deg) - 16deg); }
+  55%  { opacity: 1; scale: 1.14; rotate: calc(var(--tilt, -4deg) + 5deg); }
+  78%  { scale: .96; rotate: calc(var(--tilt, -4deg) - 2deg); }
+  100% { opacity: 1; scale: 1; rotate: var(--tilt, -4deg); }
 }
-
-@media (min-width: 900px) {
-  .gumizoo__grid {
-    --display-w: min(460px, calc(min(80svh, 800px) * 9 / 16));
-    grid-template-columns: minmax(0, 1fr) var(--display-w);
-    grid-template-areas: "intro display" "roster display";
-    grid-template-rows: auto 1fr;
-    align-items: start;
+.gumi-tile:focus-visible { z-index: 2; }
+.gumi-tile:focus-visible .gumi-tile__name { opacity: 1; animation: gumi-plate-pop .6s var(--ease) both; }
+@media (hover: hover) {
+  .gumi-tile:hover { z-index: 2; }
+  .gumi-tile:hover .gumi-tile__name { opacity: 1; animation: gumi-plate-pop .6s var(--ease) both; }
+}
+@media (hover: none) {
+  .gumi-tile__name { top: 84%; opacity: 1; font-size: clamp(18px, 5.4vw, 26px); border-width: 2px; box-shadow: 3px 3px 0 #111111; }
+  .gumi-tile__head { translate: 0 -7%; }
+}
+/* The lift: the head scales toward you, rises and tilts, breaking past the frame's edge. Motion only. */
+@media (prefers-reduced-motion: no-preference) {
+  .gumi-tile:focus-visible .gumi-tile__head {
+    transform: translateY(-7%) scale(1.14) rotate(-4deg);
+    filter: drop-shadow(0 18px 20px rgba(0, 0, 0, .28));
   }
-  .gumizoo__display { width: 100%; }
+  @media (hover: hover) {
+    .gumi-tile:hover .gumi-tile__head {
+      transform: translateY(-7%) scale(1.14) rotate(-4deg);
+      filter: drop-shadow(0 18px 20px rgba(0, 0, 0, .28));
+    }
+  }
+}
+
+.gumizoo__poster {
+  grid-area: poster;
+  justify-self: start;
+  width: min(100%, 420px);
+  aspect-ratio: 9 / 16;
+  border: var(--frame-border);
+  box-shadow: var(--frame-shadow);
+}
+.gumizoo__poster img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Desktop, per the sketch: heading on top, the 2×2 grid, and the poster beside it at the grid's full height,
+   all inside the standard .wrap. The grid is square and the poster 9:16, so the content width (less one
+   gutter) splits 1 : .5625; capped by the viewport height so both fit on screen. */
+@media (min-width: 900px) {
+  /* Framed as one screen: the section is a viewport tall (under the nav) with the block centred in it, and
+     the block is sized so heading + grid + poster always fit that height, with the same 40px above and below
+     and equal space left and right. */
+  .gumizoo {
+    --pad: 40px;
+    display: grid;
+    align-content: center;
+    min-height: calc(100svh - var(--nav-h));
+    padding-block: var(--pad);
+  }
+  .gumizoo__grid {
+    --gutter-grid: 24px;
+    --head-h: calc(12px * 1.4 + 14px + clamp(44px, 7vw, 96px) * .88);
+    --t: min(
+      (min(100cqi - 2 * var(--gutter), var(--max)) - var(--gutter-grid)) / 1.5625,
+      100svh - var(--nav-h) - 2 * var(--pad) - var(--head-h) - var(--gutter-grid) - 4px
+    );
+    grid-template-columns: var(--t) calc(var(--t) * .5625);
+    grid-template-areas: "head head" "tiles poster";
+    justify-content: center;
+  }
+  .gumizoo__poster { width: 100%; }
 }
 
 /* Experience */
@@ -1335,15 +1310,61 @@ button { font: inherit; color: inherit; }
   color: #111111;
 }
 
+/* Cycling controls: round Prev/Next pills at the sides (a bottom bar on phones) and a "2 / 7" counter
+   mirroring Close. They fill with the cycling accent like Close; the piece's own accent would vanish here. */
+.board__arrow {
+  position: fixed;
+  z-index: 5;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  background: #FAF8F2;
+  border-color: #111111;
+  color: #111111;
+}
+.board__arrow svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.board__arrow--prev { left: var(--gutter); bottom: 16px; }
+.board__arrow--next { right: var(--gutter); bottom: 16px; }
+.board__count {
+  position: fixed;
+  top: 16px;
+  left: var(--gutter);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  background: #FAF8F2;
+  color: #111111;
+  font: 500 12px/1 var(--sans);
+  letter-spacing: .1em;
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 900px) {
+  .board__arrow { top: 50%; bottom: auto; margin-top: -24px; }
+  .board__arrow--prev { left: max(8px, (var(--gutter) - 48px) / 2); }
+  .board__arrow--next { right: max(8px, (var(--gutter) - 48px) / 2); }
+}
+
 .board__sheet {
   position: relative;
   display: grid;
   gap: 16px;
+  perspective: 1800px; /* depth for the render's card-flip when cycling; origin set per flip in main.js */
   width: 100%;
   max-width: calc(var(--max) + 2 * var(--gutter));
   min-height: 100%;
   margin-inline: auto;
-  padding: 76px var(--gutter) 48px;
+  padding: 76px var(--gutter) 88px; /* clears the phone Prev/Next bar */
 }
 
 /* Every piece on the board is pinned: title, render and each card get an ink pin at one top corner
@@ -1513,22 +1534,46 @@ button { font: inherit; color: inherit; }
   display: grid;
   gap: 20px;
   width: 100%;
-  max-width: calc(1000px + 2 * var(--gutter));
+  max-width: calc(1280px + 2 * var(--gutter));
   min-height: 100%;
   margin-inline: auto;
   padding: 76px var(--gutter) 48px;
   align-content: center;
 }
-.gumi-panel__portrait {
+/* The head, now turnable: the still underneath until the turntable sprite is in, then the sprite's current
+   frame (6×6 grid of 10° steps, positioned by main.js). No tilt or frame: it sits straight on the flood. */
+.gumi-panel__model {
+  position: relative;
   justify-self: center;
-  width: min(100%, 560px);
-}
-.gumi-panel__portrait img {
   width: 100%;
-  height: auto;
-  border: 10px solid #FFFFFF;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 22px 48px rgba(0, 0, 0, .3);
+  aspect-ratio: var(--gumi-ar);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .22));
 }
+.gumi-panel__model.is-ready { cursor: grab; }
+.gumi-panel__model.is-dragging { cursor: grabbing; }
+.gumi-spin__still,
+.gumi-spin__turn {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.gumi-spin__turn { background: no-repeat 0 0 / 600% 600%; }
+.gumi-panel__model.is-ready .gumi-spin__still { visibility: hidden; }
+.gumi-panel__hint {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  translate: -50% 0;
+  padding: 5px 10px 4px;
+  background: #FAF8F2;
+  color: #111111;
+  white-space: nowrap;
+}
+.gumi-panel__model:not(.is-ready) .gumi-panel__hint { display: none; }
 .gumi-panel__stamp {
   justify-self: start;
   padding: 12px 18px 6px;
@@ -1568,16 +1613,140 @@ button { font: inherit; color: inherit; }
 
 @media (min-width: 900px) {
   .gumi-panel__sheet {
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
     grid-template-rows: 1fr auto auto auto auto 1fr;
-    column-gap: 56px;
+    column-gap: 48px;
     row-gap: 18px;
   }
-  .gumi-panel__portrait { grid-area: 1 / 1 / 7 / 2; align-self: center; width: 100%; transform: rotate(-3deg); }
+  .gumi-panel__model { grid-area: 1 / 1 / 7 / 2; align-self: center; width: 100%; }
   .gumi-panel__stamp { grid-area: 2 / 2; transform: rotate(-2deg); }
   .gumi-panel__trait { grid-area: 3 / 2; transform: rotate(1.5deg); }
   .gumi-panel__bio { grid-area: 4 / 2; transform: rotate(1.2deg); }
   .gumi-panel__more { grid-area: 5 / 2; transform: rotate(-1.5deg); }
+}
+
+/* Per-character voice for the panel's three text pieces (stamp, personality tag, bio). Same structure for all
+   four; the treatment carries the personality. main.js sets data-gumi on the panel. Gumizoo only. */
+.gumi-panel .gumi-panel__stamp {
+  padding: .2em .32em .08em;
+  border-width: 4px;
+  font-size: clamp(52px, 6.2vw, 96px);
+}
+.gumi-panel .gumi-panel__trait {
+  padding: 10px 16px 9px;
+  font: 600 clamp(15px, 1.25vw, 18px)/1.3 var(--sans);
+  letter-spacing: .1em;
+}
+.gumi-panel .gumi-panel__bio { max-width: 520px; }
+.gumi-panel .gumi-panel__bio p { font: 500 clamp(18px, 1.5vw, 22px)/1.45 var(--sans); }
+
+/* Ashik, hard-headed: blocky and squared-off. Solid accent slab with a heavy ink outline and a hard square
+   shadow, fattened lettering, no tilt anywhere; the bio is a flat, square-edged card. */
+.gumi-panel[data-gumi="ashik-rancher"] .gumi-panel__stamp {
+  border: 6px solid #111111;
+  background: var(--accent);
+  color: var(--on-accent);
+  -webkit-text-stroke: 1.5px currentColor;
+  letter-spacing: .03em;
+  box-shadow: 10px 10px 0 #111111;
+}
+.gumi-panel[data-gumi="ashik-rancher"] .gumi-panel__trait {
+  border: 0;
+  background: #111111;
+  color: #FAF8F2;
+  box-shadow: none;
+}
+.gumi-panel[data-gumi="ashik-rancher"] .gumi-panel__bio { filter: none; }
+.gumi-panel[data-gumi="ashik-rancher"] .gumi-panel__bio .board__paper {
+  clip-path: none;
+  padding-bottom: 22px;
+  border: 4px solid #111111;
+  box-shadow: 8px 8px 0 #111111;
+}
+
+/* Gia, gluttonous: glossy candy. A rounded, shiny accent stamp, and a bio note in a sugary tint whose bottom
+   edge melts into drips. */
+.gumi-panel[data-gumi="gia-tangerine"] .gumi-panel__stamp {
+  border: 0;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .38), rgba(255, 255, 255, 0) 48%),
+    var(--accent);
+  color: #FAF8F2;
+  box-shadow: inset 0 -6px 0 rgba(0, 0, 0, .18), 0 12px 24px rgba(0, 0, 0, .2);
+}
+.gumi-panel[data-gumi="gia-tangerine"] .gumi-panel__trait { border-radius: 10px; }
+.gumi-panel[data-gumi="gia-tangerine"] .gumi-panel__bio { --paper: color-mix(in oklab, var(--accent) 16%, #FFF8F0); padding-bottom: 34px; }
+.gumi-panel[data-gumi="gia-tangerine"] .gumi-panel__bio .board__paper {
+  position: relative;
+  clip-path: none;
+  padding-bottom: 20px;
+  border-radius: 16px 16px 0 0;
+  background: var(--paper);
+}
+.gumi-panel[data-gumi="gia-tangerine"] .gumi-panel__bio .board__paper::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 40px;
+  background:
+    radial-gradient(14px 30px at 9% 0, var(--paper) 98%, transparent 100%),
+    radial-gradient(9px 17px at 24% 0, var(--paper) 98%, transparent 100%),
+    radial-gradient(12px 38px at 41% 0, var(--paper) 98%, transparent 100%),
+    radial-gradient(8px 14px at 57% 0, var(--paper) 98%, transparent 100%),
+    radial-gradient(13px 26px at 72% 0, var(--paper) 98%, transparent 100%),
+    radial-gradient(10px 20px at 90% 0, var(--paper) 98%, transparent 100%);
+}
+
+/* Nanju, gambling-type stupid: reckless. Cards thrown down at loose, mismatched angles and offsets; the tag
+   is a torn-off raffle ticket with a dashed perforation. */
+.gumi-panel[data-gumi="nanju-jam"] .gumi-panel__stamp {
+  border-style: double;
+  border-width: 8px;
+  box-shadow: -8px 12px 0 color-mix(in oklab, var(--accent) 55%, #111111);
+}
+.gumi-panel[data-gumi="nanju-jam"] .gumi-panel__trait {
+  border: 2px dashed #111111;
+  background: #FFE36E;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, .2);
+}
+
+/* Rana, boy-crazy: soft and swoony. Rounded corners throughout, a soft blush shadow instead of a hard one,
+   and a light, bouncy entrance when her panel opens. */
+.gumi-panel[data-gumi="rana-ghee"] .gumi-panel__stamp {
+  border-radius: 24px;
+  box-shadow: 0 14px 30px color-mix(in oklab, var(--accent) 45%, transparent);
+}
+.gumi-panel[data-gumi="rana-ghee"] .gumi-panel__trait { border-radius: 14px; }
+.gumi-panel[data-gumi="rana-ghee"] .gumi-panel__bio .board__paper {
+  clip-path: none;
+  padding-bottom: 22px;
+  border-radius: 22px;
+  background: color-mix(in oklab, var(--accent) 12%, #FFF8F4);
+}
+@keyframes gumi-swoon {
+  0%   { opacity: 0; translate: 0 26px; scale: .92; }
+  60%  { opacity: 1; translate: 0 -6px; scale: 1.02; }
+  100% { opacity: 1; translate: 0 0; scale: 1; }
+}
+.gumi-panel[open][data-gumi="rana-ghee"] :is(.gumi-panel__stamp, .gumi-panel__trait, .gumi-panel__bio) {
+  animation: gumi-swoon .7s var(--ease) both;
+}
+.gumi-panel[open][data-gumi="rana-ghee"] .gumi-panel__stamp { animation-delay: .25s; }
+.gumi-panel[open][data-gumi="rana-ghee"] .gumi-panel__trait { animation-delay: .35s; }
+.gumi-panel[open][data-gumi="rana-ghee"] .gumi-panel__bio   { animation-delay: .45s; }
+
+@media (min-width: 900px) {
+  .gumi-panel[data-gumi="ashik-rancher"] :is(.gumi-panel__stamp, .gumi-panel__trait, .gumi-panel__bio, .gumi-panel__more) { transform: none; }
+  .gumi-panel[data-gumi="nanju-jam"] .gumi-panel__stamp { transform: rotate(-7deg) translateX(-14px); }
+  .gumi-panel[data-gumi="nanju-jam"] .gumi-panel__trait { transform: rotate(6deg) translate(46px, 4px); }
+  .gumi-panel[data-gumi="nanju-jam"] .gumi-panel__bio   { transform: rotate(-4deg) translateX(18px); }
+  .gumi-panel[data-gumi="nanju-jam"] .gumi-panel__more  { transform: rotate(3.5deg) translateX(-10px); }
+  .gumi-panel[data-gumi="rana-ghee"] .gumi-panel__stamp { transform: rotate(-1.5deg); }
+  .gumi-panel[data-gumi="rana-ghee"] .gumi-panel__trait { transform: rotate(1deg); }
+  .gumi-panel[data-gumi="rana-ghee"] .gumi-panel__bio   { transform: rotate(-.8deg); }
 }
 
 ::view-transition-group(gumi-portrait) {
@@ -1624,8 +1793,6 @@ html { -webkit-tap-highlight-color: transparent; }
   .clip-nav__btn { width: 44px; height: 44px; }
   .clip-nav__btn svg { width: 20px; height: 20px; }
 
-  .gumizoo__display { width: min(100%, calc(64svh * 9 / 16)); }
-  .gumizoo__row { min-height: 64px; }
   .pangeo-grid .card[data-tile="flagship"] { width: min(100%, calc(64svh * 9 / 16)); }
 
   .xp li { padding: 20px 0; }

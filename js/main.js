@@ -464,7 +464,12 @@
 
   const board = document.getElementById('board');
   const boardRender = board.querySelector('.board__render');
+  const boardCount = board.querySelector('.board__count');
+  const boardLive = board.querySelector('[aria-live]');
+  const BOARD_CYCLE = PROJECTS.filter((p) => p.board);
+  const renderSrc = (p) => p.board.render || p.poster || p.still;
   let boardCard = null;
+  let boardIndex = 0;
 
   const morph = (update) => {
     if (!document.startViewTransition || reduceMotion.matches) {
@@ -482,8 +487,13 @@
     const title = board.querySelector('.board__title');
     title.replaceChildren(p.title, ' ', h('span', {}, p.meta));
 
+    boardIndex = BOARD_CYCLE.indexOf(p);
+    boardCount.textContent = `${boardIndex + 1} / ${BOARD_CYCLE.length}`;
+    // Warm the neighbours' renders so a cycle never waits on the network mid-transition.
+    [-1, 1].forEach((step) => { new Image().src = renderSrc(BOARD_CYCLE[wrapIndex(boardIndex + step)]); });
+
     const img = boardRender.querySelector('img');
-    img.src = b.render || p.poster || p.still;
+    img.src = renderSrc(p);
     img.alt = b.renderAlt || p.alt;
 
     // Same hover loop as the strip card, so the render stays responsive once the board is open.
@@ -527,6 +537,125 @@
     }).finally(() => { boardRender.style.viewTransitionName = ''; });
   }
 
+  /* Cycling: Prev/Next, the arrow keys and a horizontal trackpad swipe move through the Felines in place,
+     wrapping at both ends. Two beats, transform (translate/rotate) and opacity only: the pinned pieces scatter
+     outward from the board's centre (drifting against the direction of travel), the content swaps, then the
+     new pieces fly back in from the same directions with the open animation's 60ms stagger, drifting in from
+     the far side. The main render doesn't fly: it flips on its vertical axis on its own track, timed to the same
+     beats, and its image swaps while it's edge-on. Reduced motion: a straight swap, everything already pinned. */
+
+  const wrapIndex = (i) => (i + BOARD_CYCLE.length) % BOARD_CYCLE.length;
+  const wait = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
+  const EASE_OUT = 'cubic-bezier(.2, .7, .2, 1)';
+  let cycling = false;
+
+  // Where each visible piece flies to (and back in from): out along the line from the viewport centre,
+  // plus a sideways drift against the direction of travel. The title gets its own, bigger spin.
+  function flights(step) {
+    const cx = innerWidth / 2;
+    const cy = innerHeight / 2;
+    const reach = Math.max(innerWidth, innerHeight) * .6;
+    return [...board.querySelectorAll('.board__sheet > :not([hidden])')].map((el) => {
+      const r = el.getBoundingClientRect();
+      const vx = r.left + r.width / 2 - cx;
+      const vy = r.top + r.height / 2 - cy;
+      const len = Math.hypot(vx, vy);
+      const ux = len > 40 ? vx / len : 0;
+      const uy = len > 40 ? vy / len : 0;
+      const spin = el.classList.contains('board__title') ? -step * 28 : (ux || -step) * 12;
+      return { el, x: ux * reach, y: uy * reach, drift: innerWidth * .25, spin };
+    });
+  }
+  // Each flying piece keeps its stagger slot from the full reading order (the render's slot just stays empty).
+  const flying = (list) => list.map((f, i) => ({ ...f, i })).filter((f) => f.el !== boardRender);
+
+  // The render's card-flip, around its own vertical centre line (perspective from the sheet).
+  function flipOrigin() {
+    const sheet = boardRender.parentElement;
+    const s = sheet.getBoundingClientRect();
+    const r = boardRender.getBoundingClientRect();
+    sheet.style.perspectiveOrigin = `${r.left + r.width / 2 - s.left}px ${r.top + r.height / 2 - s.top}px`;
+  }
+
+  async function cycleBoard(step) {
+    if (!board.open || cycling) return;
+    cycling = true;
+    const next = BOARD_CYCLE[wrapIndex(boardIndex + step)];
+    boardCard = document.querySelector(`.card[data-slug="${next.slug}"]`) || boardCard;
+    boardLive.textContent = `${next.title}, ${next.meta}. ${wrapIndex(boardIndex + step) + 1} of ${BOARD_CYCLE.length}`;
+
+    if (reduceMotion.matches || !Element.prototype.animate) {
+      fillBoard(next);
+      board.scrollTop = 0;
+      cycling = false;
+      return;
+    }
+
+    const out = flying(flights(step));
+    const exits = out.map(({ el, x, y, drift, spin, i }) => el.animate(
+      [{}, { translate: `${x - step * drift}px ${y}px`, rotate: `${spin}deg`, opacity: 0 }],
+      { duration: 340, delay: i * 25, easing: 'cubic-bezier(.5, 0, .75, 0)', fill: 'forwards' },
+    ));
+    // Render: turns to edge-on over the whole exit beat, so it's invisible exactly when the content swaps.
+    const exitBeat = 340 + Math.max(0, ...out.map((f) => f.i)) * 25;
+    flipOrigin();
+    const flipOut = boardRender.animate(
+      [{}, { rotate: `y ${-step * 90}deg` }],
+      { duration: exitBeat, easing: 'cubic-bezier(.45, 0, .8, .4)', fill: 'forwards' },
+    );
+    await Promise.all([...exits, flipOut].map((a) => a.finished.catch(() => {})));
+
+    fillBoard(next);
+    board.scrollTop = 0;
+    const img = boardRender.querySelector('img');
+    await Promise.race([img.decode().catch(() => {}), wait(250)]);
+
+    // Drop the exits, measure the new layout's resting positions and start the entries in the same task, so
+    // nothing paints in between.
+    exits.forEach((a) => a.cancel());
+    flipOut.cancel();
+    const back = flying(flights(step));
+    const entries = back.map(({ el, x, y, drift, spin, i }) => el.animate(
+      [{ translate: `${x + step * drift}px ${y}px`, rotate: `${-spin}deg`, opacity: 0 }, {}],
+      { duration: 480, delay: i * 60, easing: EASE_OUT, fill: 'backwards' },
+    ));
+    // Render: continues the same turn from the other edge, landing with the middle of the card stagger.
+    flipOrigin();
+    const flipIn = boardRender.animate(
+      [{ rotate: `y ${step * 90}deg` }, {}],
+      { duration: 620, easing: EASE_OUT },
+    );
+    await Promise.all([...entries, flipIn].map((a) => a.finished.catch(() => {})));
+    cycling = false;
+  }
+
+  board.querySelectorAll('.board__arrow').forEach((btn) => {
+    btn.addEventListener('click', () => cycleBoard(Number(btn.dataset.step)));
+  });
+  board.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    cycleBoard(e.key === 'ArrowRight' ? 1 : -1);
+  });
+
+  // Trackpad two-finger swipe: horizontal wheel deltas add up to a threshold; one gesture fires once, and the
+  // next can only fire after the wheel has been quiet for a moment (trackpads keep sending inertia events).
+  let swipeSum = 0;
+  let swipeSpent = false;
+  let swipeQuiet = 0;
+  board.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    e.preventDefault();
+    clearTimeout(swipeQuiet);
+    swipeQuiet = setTimeout(() => { swipeSum = 0; swipeSpent = false; }, 220);
+    if (swipeSpent) return;
+    swipeSum += e.deltaX;
+    if (Math.abs(swipeSum) > 80) {
+      swipeSpent = true;
+      cycleBoard(swipeSum > 0 ? 1 : -1);
+    }
+  }, { passive: false });
+
   function closeBoard() {
     if (!board.open) return;
     const media = boardCard && boardCard.querySelector('.card__media');
@@ -549,36 +678,100 @@
     closeBoard();
   });
   board.addEventListener('click', (e) => {
-    if (!e.target.closest('.board__sheet > *, .board__close')) closeBoard();
+    if (!e.target.closest('.board__sheet > *, .board__close, .board__arrow')) closeBoard();
   });
   board.addEventListener('close', () => {
     stopLoop(boardRender);
+    boardLive.textContent = '';
     document.documentElement.classList.remove('is-locked');
     if (boardCard) boardCard.focus();
   });
 
-  /* Gumizoo: roster rows preview each character in the display window; clicking opens a detail panel */
+  /* Gumizoo: a 2×2 grid of the four heads, rendered in Blender (a still plus a 36-frame, 10°-a-step turntable
+     sprite each; no WebGL). Hover/focus lifts the head out of its frame, shows its name, floods that tile with
+     its accent and colours the section heading to match. Clicking plays one full turn of the head as the morph into the detail panel, where dragging
+     (or the arrow keys) turns it. Reduced motion: no lift, no spin, the panel opens with the head in place. */
 
   const gumizoo = document.getElementById('gumizoo');
   const gumiPanel = document.getElementById('gumi-panel');
   let openGumi = () => {};
 
-  if (gumizoo && gumiPanel && typeof GUMIZOO !== 'undefined') {
-    const display = gumizoo.querySelector('.gumizoo__display');
-    const layers = gumizoo.querySelector('.gumizoo__layers');
-    const caption = gumizoo.querySelector('.gumizoo__caption');
-    const list = gumizoo.querySelector('.gumizoo__list');
-    const portrait = gumiPanel.querySelector('.gumi-panel__portrait');
-    const portraitImg = portrait.querySelector('img');
-    const layerFor = {};
-    const bySlug = (slug) => GUMIZOO.characters.find((c) => c.slug === slug);
-    const srcset = (c) => `media/stills/gumizoo-${c.slug}-640.webp 640w, media/stills/gumizoo-${c.slug}.webp 1280w`;
+  const SPIN_FRAMES = 36;
+  const SPIN_COLS = 6;
+  // Phones get the 480px-a-frame sprite (2880px sheet): the 720px one decodes to ~75 MB, too much for a phone.
+  const spriteSrc = (c) => `media/stills/gumizoo-${c.slug}-turn${matchMedia('(max-width: 699px)').matches ? '-480' : ''}.webp`;
+  const spriteLoads = {};
+  const loadSprite = (c) => {
+    if (!spriteLoads[c.slug]) {
+      spriteLoads[c.slug] = new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = spriteSrc(c);
+      });
+    }
+    return spriteLoads[c.slug];
+  };
 
-    const previewFrags = gumizoo.querySelector('.gumi-frags--preview');
+  // A turnable head: the still sits underneath; once the sprite is in, the sprite shows the current frame.
+  function spinner(el) {
+    const turn = el.querySelector('.gumi-spin__turn');
+    let frame = 0;
+    let run = 0;
+    const api = {
+      get frame() { return frame; },
+      set(f) {
+        frame = ((Math.round(f) % SPIN_FRAMES) + SPIN_FRAMES) % SPIN_FRAMES;
+        const col = frame % SPIN_COLS;
+        const row = Math.floor(frame / SPIN_COLS);
+        const last = SPIN_FRAMES / SPIN_COLS - 1;
+        turn.style.backgroundPosition = `${(col / (SPIN_COLS - 1)) * 100}% ${(row / last) * 100}%`;
+        const deg = frame * (360 / SPIN_FRAMES);
+        el.setAttribute('aria-valuenow', String(deg));
+        el.setAttribute('aria-valuetext', deg ? `Turned ${deg} degrees` : 'Facing front');
+      },
+      use(c, ready) {
+        el.classList.toggle('is-ready', ready);
+        turn.style.backgroundImage = ready ? cssUrl(spriteSrc(c)) : '';
+        api.set(0);
+      },
+      // Tween to a frame (past 36 for a full turn), easing in and out.
+      turnTo(target, ms) {
+        const id = ++run;
+        const from = frame;
+        const start = performance.now();
+        return new Promise((resolve) => {
+          const tick = (now) => {
+            if (id !== run) return resolve();
+            const t = Math.min(1, (now - start) / ms);
+            const e = t < .5 ? 4 * t * t * t : 1 - ((-2 * t + 2) ** 3) / 2;
+            api.set(from + (target - from) * e);
+            if (t < 1) requestAnimationFrame(tick);
+            else resolve();
+          };
+          requestAnimationFrame(tick);
+        });
+      },
+      stop() { run += 1; },
+    };
+    return api;
+  }
+
+  if (gumizoo && gumiPanel && typeof GUMIZOO !== 'undefined') {
+    const tiles = gumizoo.querySelector('.gumizoo__tiles');
+    const model = gumiPanel.querySelector('.gumi-panel__model');
+    const modelStill = model.querySelector('.gumi-spin__still');
+    const spin = spinner(model);
     const panelFrags = gumiPanel.querySelector('.gumi-frags--panel');
     const more = gumiPanel.querySelector('.gumi-panel__more');
+    const bySlug = (slug) => GUMIZOO.characters.find((c) => c.slug === slug);
+    const still = (c) => `media/stills/gumizoo-${c.slug}-3d.webp`;
 
-    // A fragment is either a real cut-out ({ src }) or a placeholder crop of the portrait ({ at, zoom, shape }).
+    gumizoo.querySelector('.gumizoo__poster').append(h('img', {
+      src: GUMIZOO.poster.src, alt: GUMIZOO.poster.alt, width: '1080', height: '1920', loading: 'lazy', decoding: 'async',
+    }));
+
+    // Panel fragments: a real cut-out ({ src }) or a placeholder crop of the 2D portrait ({ at, zoom, shape }).
     const fragment = (c, f) => {
       const el = h('span', { class: 'gumi-frag', 'data-shape': f.src ? null : f.shape });
       if (f.src) {
@@ -598,93 +791,61 @@
       container.replaceChildren(...Array.from({ length: list.length ? count : 0 }, (_, i) => fragment(c, list[i % list.length])));
     };
 
-    const posterLayer = h('div', { class: 'gumizoo__layer gumizoo__layer--poster is-active' },
-      h('img', { src: GUMIZOO.poster.src, alt: GUMIZOO.poster.alt, loading: 'lazy', decoding: 'async' }));
-    layers.append(posterLayer);
-
     for (const c of GUMIZOO.characters) {
-      const layer = h('div', { class: 'gumizoo__layer', 'aria-hidden': 'true' }, h('img', {
-        src: `media/stills/gumizoo-${c.slug}-640.webp`, srcset: srcset(c), sizes: '(min-width: 900px) 460px, 100vw',
-        alt: c.alt, loading: 'lazy', decoding: 'async',
-      }));
-      layer.style.setProperty('--layer-bg', c.bg);
-      layers.append(layer);
-      layerFor[c.slug] = layer;
-
-      const chip = h('span', { class: 'gumizoo__chip', 'aria-hidden': 'true' },
-        h('img', { src: `media/stills/gumizoo-${c.slug}-chip.webp`, alt: '', width: '56', height: '56', loading: 'lazy' }));
-      if (c.video) {
-        chip.insertAdjacentHTML('beforeend',
-          '<svg class="gumizoo__play" viewBox="0 0 22 22" focusable="false"><circle cx="11" cy="11" r="10"/><path d="M9 7.2v7.6l6-3.8z"/></svg>');
-      }
-      const row = h('button', {
-        type: 'button', class: 'gumizoo__row', 'data-slug': c.slug, 'aria-haspopup': 'dialog',
-        'aria-label': `${c.name} ${c.surname}: ${c.trait}${c.video ? ` Includes the video ${c.video.title}.` : ''}`,
+      const tile = h('button', {
+        type: 'button', class: 'gumi-tile', 'data-slug': c.slug, 'aria-haspopup': 'dialog',
+        'aria-label': `${c.name} ${c.surname}. ${c.alt}${c.video ? ` Includes the video ${c.video.title}.` : ''}`,
       }, [
-        chip,
-        h('span', { class: 'gumizoo__row-name' }, [c.name, ' ', h('span', { class: 'gumizoo__row-surname' }, c.surname)]),
-        h('span', { class: 'gumizoo__row-trait', 'aria-hidden': 'true' }, c.trait),
+        h('img', { class: 'gumi-tile__head', src: still(c), alt: '', width: '770', height: '606', loading: 'lazy', decoding: 'async' }),
+        h('span', { class: 'gumi-tile__name', 'aria-hidden': 'true' }, [c.name, ' ', h('span', {}, c.surname)]),
       ]);
-      setAccent(row, c.accent);
-      list.append(h('li', {}, row));
+      setAccent(tile, c.accent);
+      tiles.append(h('li', {}, tile));
     }
 
-    let shown = null;
-    const show = (c) => {
-      const active = c ? layerFor[c.slug] : posterLayer;
-      for (const layer of layers.children) {
-        const on = layer === active;
-        layer.classList.toggle('is-active', on);
-        if (on) layer.removeAttribute('aria-hidden');
-        else layer.setAttribute('aria-hidden', 'true');
+    // Hover/focus: the tile floods itself (CSS); here the heading takes this head's accent (black again when
+    // nothing is hovered), and its turntable starts loading for the click.
+    const flood = (c) => {
+      if (c) {
+        gumizoo.style.setProperty('--title-accent', c.accent);
+        loadSprite(c);
+      } else {
+        gumizoo.style.removeProperty('--title-accent');
       }
-      display.classList.toggle('is-previewing', Boolean(c));
-      gumizoo.classList.toggle('is-flooded', Boolean(c));
-      if (c && c !== shown) {
-        setAccent(caption, c.accent);
-        caption.querySelector('.gumizoo__caption-name').textContent = `${c.name} ${c.surname}`;
-        caption.querySelector('.gumizoo__caption-trait').textContent = c.trait;
-        gumizoo.style.setProperty('--flood', c.accent);
-        gumizoo.style.setProperty('--on-flood', onColor(c.accent));
-        scatter(previewFrags, c, 4);
-      }
-      shown = c;
     };
-    list.addEventListener('pointerover', (e) => {
-      const row = e.target.closest('.gumizoo__row');
-      if (row && e.pointerType === 'mouse') show(bySlug(row.dataset.slug));
+    tiles.addEventListener('pointerover', (e) => {
+      const tile = e.target.closest('.gumi-tile');
+      if (tile && e.pointerType === 'mouse') flood(bySlug(tile.dataset.slug));
     });
-    list.addEventListener('pointerleave', (e) => {
-      if (e.pointerType === 'mouse' && !list.contains(document.activeElement)) show(null);
+    tiles.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'mouse' && !tiles.contains(document.activeElement)) flood(null);
     });
-    list.addEventListener('focusin', (e) => {
-      const row = e.target.closest('.gumizoo__row');
-      if (row) show(bySlug(row.dataset.slug));
+    tiles.addEventListener('focusin', (e) => {
+      const tile = e.target.closest('.gumi-tile');
+      if (tile) flood(bySlug(tile.dataset.slug));
     });
-    list.addEventListener('focusout', (e) => {
-      if (!list.contains(e.relatedTarget) && !gumiPanel.open) show(null);
+    tiles.addEventListener('focusout', (e) => {
+      if (!tiles.contains(e.relatedTarget) && !gumiPanel.open) flood(null);
     });
 
-    let gumiRow = null;
-    let gumiSource = null;
-    const inView = (el) => {
-      const r = el.getBoundingClientRect();
-      return r.bottom > 0 && r.top < innerHeight;
-    };
+    let gumiTile = null;
+    const tileHead = (tile) => tile.querySelector('.gumi-tile__head');
 
-    openGumi = (row) => {
-      const c = bySlug(row.dataset.slug);
-      gumiRow = row;
-      gumiSource = shown === c && inView(display) ? layerFor[c.slug] : row.querySelector('.gumizoo__chip');
-      gumiSource.style.viewTransitionName = 'gumi-portrait';
+    openGumi = async (tile) => {
+      const c = bySlug(tile.dataset.slug);
+      gumiTile = tile;
+      // Give the turntable a moment if it isn't in yet (usually it is: hover already started it).
+      const ready = await Promise.race([loadSprite(c), wait(400).then(() => false)]);
+      const turn = ready && !reduceMotion.matches;
+      tileHead(tile).style.viewTransitionName = 'gumi-portrait';
       morph(() => {
-        gumiSource.style.viewTransitionName = '';
-        show(c);
+        tileHead(tile).style.viewTransitionName = '';
+        flood(c);
         setAccent(gumiPanel, c.accent);
-        portraitImg.src = `media/stills/gumizoo-${c.slug}.webp`;
-        portraitImg.srcset = srcset(c);
-        portraitImg.sizes = '(min-width: 900px) 560px, 100vw';
-        portraitImg.alt = c.alt;
+        gumiPanel.dataset.gumi = c.slug; // per-character text treatment (CSS)
+        modelStill.src = still(c);
+        spin.use(c, ready);
+        model.setAttribute('aria-label', `${c.alt} Turn it with the arrow keys or by dragging.`);
         gumiPanel.querySelector('.gumi-panel__stamp').textContent = `${c.name} ${c.surname}`;
         gumiPanel.querySelector('.gumi-panel__trait').textContent = c.trait;
         gumiPanel.querySelector('.gumi-panel__bio p').textContent = c.bio;
@@ -698,22 +859,57 @@
           video.muted = true;
           more.append(video);
         }
-        portrait.style.viewTransitionName = 'gumi-portrait';
+        model.style.viewTransitionName = 'gumi-portrait';
         document.documentElement.classList.add('is-locked');
         gumiPanel.showModal();
         gumiPanel.scrollTop = 0;
-      }).finally(() => { portrait.style.viewTransitionName = ''; });
+        // The full turn runs inside the morph (the incoming view is live), so the spin is the transition.
+        if (turn) spin.turnTo(SPIN_FRAMES, 1100);
+      }).finally(() => { model.style.viewTransitionName = ''; });
     };
 
-    const closeGumi = () => {
+    const closeGumi = async () => {
       if (!gumiPanel.open) return;
-      portrait.style.viewTransitionName = 'gumi-portrait';
+      // Face front again before morphing back to the tile's still.
+      if (spin.frame && !reduceMotion.matches) {
+        await spin.turnTo(spin.frame > SPIN_FRAMES / 2 ? SPIN_FRAMES : 0, 260);
+      }
+      spin.stop();
+      spin.set(0);
+      model.style.viewTransitionName = 'gumi-portrait';
+      const head = gumiTile && tileHead(gumiTile);
       morph(() => {
-        portrait.style.viewTransitionName = '';
-        if (gumiSource) gumiSource.style.viewTransitionName = 'gumi-portrait';
+        model.style.viewTransitionName = '';
+        if (head) head.style.viewTransitionName = 'gumi-portrait';
         gumiPanel.close();
-      }).finally(() => { if (gumiSource) gumiSource.style.viewTransitionName = ''; });
+      }).finally(() => { if (head) head.style.viewTransitionName = ''; });
     };
+
+    // Turning in the panel: drag across (the model's full width is one full turn) or arrow keys, 10° a step.
+    let drag = null;
+    model.addEventListener('pointerdown', (e) => {
+      if (!model.classList.contains('is-ready')) return;
+      spin.stop();
+      drag = { x: e.clientX, frame: spin.frame, w: model.clientWidth };
+      model.setPointerCapture(e.pointerId);
+      model.classList.add('is-dragging');
+    });
+    model.addEventListener('pointermove', (e) => {
+      if (drag) spin.set(drag.frame + ((e.clientX - drag.x) / drag.w) * SPIN_FRAMES);
+    });
+    const endDrag = () => {
+      drag = null;
+      model.classList.remove('is-dragging');
+    };
+    model.addEventListener('pointerup', endDrag);
+    model.addEventListener('pointercancel', endDrag);
+    model.addEventListener('keydown', (e) => {
+      const step = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key];
+      if (!step || !model.classList.contains('is-ready')) return;
+      e.preventDefault();
+      spin.stop();
+      spin.set(spin.frame + step);
+    });
 
     gumiPanel.querySelector('.board__close').addEventListener('click', closeGumi);
     gumiPanel.addEventListener('cancel', (e) => {
@@ -726,14 +922,14 @@
     gumiPanel.addEventListener('close', () => {
       more.replaceChildren();
       document.documentElement.classList.remove('is-locked');
-      if (gumiRow) gumiRow.focus();
+      if (gumiTile) gumiTile.focus();
     });
   }
 
   document.addEventListener('click', (e) => {
-    const row = e.target.closest('.gumizoo__row');
-    if (row) {
-      openGumi(row);
+    const tile = e.target.closest('.gumi-tile');
+    if (tile) {
+      openGumi(tile);
       return;
     }
     const card = e.target.closest('.card[data-slug]');

@@ -85,25 +85,13 @@
       </section>
 
       <section class="band gumizoo" id="gumizoo" aria-labelledby="gumizoo-title">
-        <div class="gumizoo__flood" aria-hidden="true"><div class="gumi-frags gumi-frags--preview"></div></div>
         <div class="wrap gumizoo__grid">
-          <div class="gumizoo__intro">
+          <div class="gumizoo__head">
             <p class="label">Character collection</p>
             <h3 class="project-title" id="gumizoo-title">Gumizoo</h3>
-            <p>A zoo of gummy characters, each with a name and a flavour.</p>
-            <p class="label gumizoo__materials">PLA+ filament, wood filler, primer, acrylic paint.</p>
           </div>
-          <figure class="gumizoo__display">
-            <div class="gumizoo__layers"></div>
-            <figcaption class="gumizoo__caption" aria-hidden="true">
-              <span class="gumizoo__caption-name"></span>
-              <span class="gumizoo__caption-trait"></span>
-            </figcaption>
-          </figure>
-          <div class="gumizoo__roster">
-            <h4 class="gumizoo__tagline">Four forms of stupidity</h4>
-            <ul class="gumizoo__list"></ul>
-          </div>
+          <ul class="gumizoo__tiles" aria-label="The four gumis"></ul>
+          <figure class="gumizoo__poster"></figure>
         </div>
       </section>
 
@@ -249,6 +237,10 @@
 
   <dialog class="board" id="board" aria-labelledby="board-title">
     <button class="pill board__close js-fill" type="button">Close</button>
+    <p class="board__count" aria-hidden="true"></p>
+    <button class="pill board__arrow board__arrow--prev js-fill" type="button" aria-label="Previous Feline" data-step="-1"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg></button>
+    <button class="pill board__arrow board__arrow--next js-fill" type="button" aria-label="Next Feline" data-step="1"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg></button>
+    <p class="visually-hidden" aria-live="polite"></p>
     <article class="board__sheet">
       <h2 class="board__title" id="board-title"></h2>
       <figure class="board__render"><img alt=""><video muted loop playsinline preload="none" tabindex="-1" aria-hidden="true"></video></figure>
@@ -282,7 +274,11 @@
     <button class="pill board__close js-fill" type="button">Close</button>
     <div class="gumi-frags gumi-frags--panel" aria-hidden="true"></div>
     <article class="gumi-panel__sheet">
-      <figure class="gumi-panel__portrait"><img alt="" width="1280" height="960"></figure>
+      <div class="gumi-panel__model gumi-spin" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="350" aria-valuenow="0">
+        <img class="gumi-spin__still" alt="" width="770" height="606">
+        <div class="gumi-spin__turn" aria-hidden="true"></div>
+        <p class="gumi-panel__hint label" aria-hidden="true">Drag to turn</p>
+      </div>
       <h2 class="gumi-panel__stamp" id="gumi-panel-name"></h2>
       <p class="gumi-panel__trait"></p>
       <section class="gumi-panel__bio" aria-labelledby="gumi-panel-bio">
