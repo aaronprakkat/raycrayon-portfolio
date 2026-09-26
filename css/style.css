@@ -960,11 +960,13 @@ button { font: inherit; color: inherit; }
     padding-block: var(--pad);
   }
   .gumizoo__grid {
-    --gutter-grid: 20px;
+    --gutter-grid: 16px;
     gap: var(--gutter-grid);
-    /* .gumizoo__head's real height: the "Character collection" label, a 10px gap, the GUMIZOO heading, another
-       10px gap, then the tagline — each term the exact font-size expression that field uses. */
-    --head-h: calc(16.8px + 10px + clamp(44px, 7vw, 96px) * .88 + 10px + clamp(22px, 2.4vw, 28px) * .95);
+    /* .gumizoo__head's real height: the "Character collection" label, an 8px gap, the GUMIZOO heading (capped
+       lower here than .project-title's usual 96px, see below), another 8px gap, then the tagline (also capped
+       lower than its usual 28px) — each term the exact font-size expression that field uses. Every px trimmed
+       from this stack or the grid gaps is a px the no-scroll --t budget can give back to the tiles/poster. */
+    --head-h: calc(16.8px + 8px + clamp(44px, 7vw, 88px) * .88 + 8px + clamp(22px, 2.4vw, 26px) * .95);
     --materials-h: 16.8px; /* the materials note, one line of .label */
     --t: min(
       (min(100cqi - 2 * var(--gutter), var(--max)) - var(--gutter-grid)) / 1.5625,
@@ -974,7 +976,11 @@ button { font: inherit; color: inherit; }
     grid-template-areas: "head head" "tiles poster" "materials materials";
     justify-content: start;
   }
-  .gumizoo__head { gap: 10px; }
+  .gumizoo__head { gap: 8px; }
+  /* Matches --head-h's caps above: Gumizoo-only, doesn't touch the shared .project-title/.gumizoo__tagline
+     rules used elsewhere or on phones (this lives inside the 900px+ block already). */
+  .gumizoo .project-title { font-size: clamp(44px, 7vw, 88px); }
+  .gumizoo__tagline { font-size: clamp(22px, 2.4vw, 26px); }
   .gumizoo__poster { width: 100%; }
 }
 
