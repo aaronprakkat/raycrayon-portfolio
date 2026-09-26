@@ -815,14 +815,9 @@ button { font: inherit; color: inherit; }
   gap: 24px var(--gutter-grid);
   grid-template-areas: "head" "tiles" "poster" "materials";
 }
-/* Same heading-beside-description composition as .project-head (Pangeo etc.): the description sits at full
-   row width, using the space the tiles/poster below don't need at every width — not a plain stack under the
-   tagline. */
-.gumizoo__head { grid-area: head; display: grid; gap: 14px 48px; }
-.gumizoo__head > div { display: grid; gap: 14px; }
-.gumizoo__intro { max-width: 52ch; align-self: end; }
+.gumizoo__head { grid-area: head; display: grid; gap: 14px; }
 .gumizoo__tagline {
-  font: 400 clamp(24px, 2.8vw, 34px)/.95 var(--display);
+  font: 400 clamp(22px, 2.4vw, 28px)/.95 var(--display);
   color: var(--muted);
   text-transform: uppercase;
 }
@@ -834,8 +829,6 @@ button { font: inherit; color: inherit; }
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--gutter-grid);
 }
-.gumizoo__tiles li:nth-child(odd) { --tilt: -5deg; }
-.gumizoo__tiles li:nth-child(even) { --tilt: 4deg; }
 /* Tile texture: one grainy-gradient stack that goes from quiet to bold. At rest a light neutral gradient with a
    grain that reads on its own; on hover/focus the accent gradient fades in underneath the same grain. */
 .gumi-tile {
@@ -897,43 +890,41 @@ button { font: inherit; color: inherit; }
   transition: transform .45s var(--ease), filter .45s var(--ease);
 }
 
-/* Nameplate: a chunky toy-shop sticker (accent fill, ink outline and hard offset shadow) that pops up centred
-   over the head, tilted, bouncing in with a wobble. Always shown on touch, where there's no hover. */
+/* Nameplate: a slim band across just the bottom of the frame — legible, but the head stays fully visible
+   above it, not covered. Always shown on touch, where there's no hover. */
 .gumi-tile__name {
   position: absolute;
-  left: 50%;
-  top: 70%;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 3;
-  display: grid;
-  justify-items: center;
-  width: max-content;
-  max-width: 92%;
-  padding: .16em .34em .06em;
-  border: 3px solid #111111;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: .3em;
+  padding: .38em .5em .26em;
+  border-top: 3px solid #111111;
   background: var(--accent);
   color: var(--on-accent);
-  box-shadow: 4px 5px 0 #111111;
-  font: 400 clamp(30px, 4.4vw, 60px)/.84 var(--display);
+  font: 400 clamp(14px, 1.7vw, 19px)/1 var(--display);
   letter-spacing: .02em;
   text-transform: uppercase;
-  translate: -50% -50%;
-  rotate: var(--tilt, -4deg);
+  translate: 0 100%;
   opacity: 0;
   pointer-events: none;
   transition: opacity .2s var(--ease);
 }
-.gumi-tile__name span { font-size: .6em; letter-spacing: .06em; }
-@keyframes gumi-plate-pop {
-  0%   { opacity: 0; scale: .35; rotate: calc(var(--tilt, -4deg) - 16deg); }
-  55%  { opacity: 1; scale: 1.14; rotate: calc(var(--tilt, -4deg) + 5deg); }
-  78%  { scale: .96; rotate: calc(var(--tilt, -4deg) - 2deg); }
-  100% { opacity: 1; scale: 1; rotate: var(--tilt, -4deg); }
+.gumi-tile__name span { font-size: .82em; letter-spacing: .05em; }
+@keyframes gumi-band-in {
+  0%   { opacity: 0; translate: 0 100%; }
+  60%  { opacity: 1; translate: 0 -8%; }
+  100% { opacity: 1; translate: 0 0; }
 }
 .gumi-tile.is-active { z-index: 2; }
-.gumi-tile.is-active .gumi-tile__name { opacity: 1; animation: gumi-plate-pop .6s var(--ease) both; }
+.gumi-tile.is-active .gumi-tile__name { opacity: 1; animation: gumi-band-in .4s var(--ease) both; }
 @media (hover: none) {
-  .gumi-tile__name { top: 84%; opacity: 1; font-size: clamp(18px, 5.4vw, 26px); border-width: 2px; box-shadow: 3px 3px 0 #111111; }
-  .gumi-tile__head { translate: 0 -7%; }
+  .gumi-tile__name { opacity: 1; translate: 0 0; font-size: clamp(12px, 3.2vw, 15px); border-top-width: 2px; }
+  .gumi-tile__head { translate: 0 -6%; }
 }
 /* The lift: the head scales toward you, rises and tilts, breaking past the frame's edge. Motion only. */
 @media (prefers-reduced-motion: no-preference) {
@@ -953,44 +944,37 @@ button { font: inherit; color: inherit; }
 }
 .gumizoo__poster img { width: 100%; height: 100%; object-fit: cover; }
 
-/* Desktop, per the sketch: heading on top, the 2×2 grid, and the poster beside it at the grid's full height,
-   the materials note below both, all inside the standard .wrap. The grid is square and the poster 9:16, so
-   the content width (less one gutter) splits 1 : .5625 — but the section fitting one screen, no scroll, is
-   what actually sizes the block: work backward from the height left over once the heading/tagline, the
-   materials note and the section's own padding are accounted for (matching their real rendered size, via the
-   same clamp() expressions their type uses), and only then does width get a say, as a ceiling so the block
-   never runs past the standard --max container on a wide-and-tall screen. Legibility of the tiles/poster
-   matters, but fitting without a scroll takes priority over how big they end up. */
+/* Desktop, per the sketch: heading top-left, the 2×2 grid directly under it, the poster beside the grid at
+   its full height, the materials note below both — one compact block, left-aligned at the standard gutter
+   like every other section's heading (not centred, and not stretched to span wider than the grid/poster
+   below it: a heading wider than what's under it is what read as a stray floating element last round).
+   The grid is square and the poster 9:16, so the content width (less one gutter) splits 1 : .5625; overhead
+   (padding, gaps, the heading stack) is kept as tight as it can be while still reading calmly, since every
+   px trimmed there is a px the grid/poster can use instead, within the one-screen-no-scroll budget. */
 @media (min-width: 900px) {
   .gumizoo {
-    --pad: 40px;
+    --pad: 24px;
     display: grid;
     align-content: center;
     min-height: calc(100svh - var(--nav-h));
     padding-block: var(--pad);
   }
   .gumizoo__grid {
-    --gutter-grid: 24px;
-    /* .gumizoo__head's real height: the "Character collection" label, a 14px gap, the GUMIZOO heading, another
-       14px gap, then the tagline — each term the exact font-size expression that field uses. The intro
-       paragraph beside it is Inter body copy at a fixed size, well short of that stack even at 2-3 lines, so
-       it never becomes the row's tallest column and doesn't need its own term here. */
-    --head-h: calc(16.8px + 14px + clamp(44px, 7vw, 96px) * .88 + 14px + clamp(24px, 2.8vw, 34px) * .95);
+    --gutter-grid: 20px;
+    gap: var(--gutter-grid);
+    /* .gumizoo__head's real height: the "Character collection" label, a 10px gap, the GUMIZOO heading, another
+       10px gap, then the tagline — each term the exact font-size expression that field uses. */
+    --head-h: calc(16.8px + 10px + clamp(44px, 7vw, 96px) * .88 + 10px + clamp(22px, 2.4vw, 28px) * .95);
     --materials-h: 16.8px; /* the materials note, one line of .label */
     --t: min(
       (min(100cqi - 2 * var(--gutter), var(--max)) - var(--gutter-grid)) / 1.5625,
-      100svh - var(--nav-h) - 2 * var(--pad) - var(--head-h) - var(--materials-h) - 2 * 24px - 4px
+      100svh - var(--nav-h) - 2 * var(--pad) - var(--head-h) - var(--materials-h) - 2 * var(--gutter-grid) - 2px
     );
-    /* Head (and its intro paragraph) spans the full standard content width, same as every other section's
-       heading — only the tiles/poster block below is capped to --t; a 3rd, unnamed column just absorbs
-       whatever width that leaves. Left-aligned (not centred): every other section's heading sits flush at the
-       standard gutter, and centring only reads right when the block is close to the container's full width. */
-    grid-template-columns: var(--t) calc(var(--t) * .5625) 1fr;
-    grid-template-areas: "head head head" "tiles poster ." "materials materials .";
+    grid-template-columns: var(--t) calc(var(--t) * .5625);
+    grid-template-areas: "head head" "tiles poster" "materials materials";
     justify-content: start;
   }
-  .gumizoo__head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: end; }
-  .gumizoo__materials { margin-top: -4px; }
+  .gumizoo__head { gap: 10px; }
   .gumizoo__poster { width: 100%; }
 }
 

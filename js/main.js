@@ -720,10 +720,14 @@
       // roughly the scale it'll actually need, not some other cached size it'd have to redo the work for anyway.
       // (--gumi-ar)'s raw value is "1230 / 963" — var() substitutes those tokens literally, so without the
       // extra parens this would parse as 800px / 1230 / 963 (three-way left-to-right division), not 800px
-      // divided by the ratio. opacity is .01, not 0: a fully-transparent element is indistinguishable from
-      // unpainted, and the browser can (and does, measured) skip the actual decode/rasterise work for it —
-      // .01 is still visually nothing but forces the real paint pipeline to run.
-      spriteWarmer.style.cssText = 'position:fixed; inset:auto 0 0 auto; width:800px; height:calc(800px / (var(--gumi-ar))); opacity:.01; pointer-events:none;';
+      // divided by the ratio.
+      // opacity is .003, not 0: a fully-transparent box lets the browser skip the actual decode/rasterise work,
+      // which is the whole point of this element. .01 shipped once and was visible — a bright sprite spread
+      // over an 800px box, a soft accent-coloured smear in the corner of the section (measured: max 1/255 per
+      // channel against a no-hover baseline at .003, a real smear at .01). Clipping the box down to hide it
+      // that way, tried too, measurably weakens the warm-up itself (the browser seems to only bother
+      // rasterising what's actually going to be visible) — .003 keeps the full box doing full work.
+      spriteWarmer.style.cssText = 'position:fixed; inset:auto 0 0 auto; width:800px; height:calc(800px / (var(--gumi-ar))); opacity:.003; pointer-events:none;';
       document.body.append(spriteWarmer);
     }
     spriteWarmer.style.background = `no-repeat 0 0 / 600% 600% ${cssUrl(spriteSrc(c))}`;
