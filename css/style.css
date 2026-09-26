@@ -1,5 +1,5 @@
 :root {
-  --gumi-ar: 770 / 606; /* Gumizoo head renders: shared crop aspect, see the build note in CLAUDE.md */
+  --gumi-ar: 1230 / 963; /* Gumizoo head renders: shared crop aspect, see the build note in CLAUDE.md */
   --bg: #FAF8F2;
   --fg: #111111;
   --muted: #6B6B6B;
@@ -813,9 +813,15 @@ button { font: inherit; color: inherit; }
   --frame-shadow: 0 1px 2px rgba(0, 0, 0, .08), 0 14px 26px -10px rgba(0, 0, 0, .3);
   display: grid;
   gap: 24px var(--gutter-grid);
-  grid-template-areas: "head" "tiles" "poster";
+  grid-template-areas: "head" "tiles" "poster" "materials";
 }
 .gumizoo__head { grid-area: head; display: grid; gap: 14px; }
+.gumizoo__tagline {
+  font: 400 clamp(24px, 2.8vw, 34px)/.95 var(--display);
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.gumizoo__materials { grid-area: materials; }
 
 .gumizoo__tiles {
   grid-area: tiles;
@@ -863,15 +869,16 @@ button { font: inherit; color: inherit; }
   z-index: 1;
   background-image: var(--grain);
   opacity: .42;
-  mix-blend-mode: multiply;
+  /* soft-light, not multiply: multiply only ever darkens, which is what made the resting tone read heavier
+     than the light-neutral one intended (same fix applies to the hover/active flood underneath, since it's
+     the same grain layer at a higher opacity — one texture, quiet to bold, per the earlier build note). */
+  mix-blend-mode: soft-light;
   transition: opacity .35s var(--ease);
 }
-.gumi-tile:focus-visible::before { opacity: 1; }
-.gumi-tile:focus-visible::after { opacity: .5; }
-@media (hover: hover) {
-  .gumi-tile:hover::before { opacity: 1; }
-  .gumi-tile:hover::after { opacity: .5; }
-}
+/* .is-active is set by main.js (pointerover/focusin), not :hover/:focus-visible: a tile has to explicitly be
+   told it's active so the click-to-open and close-return-focus paths can reliably switch it off again. */
+.gumi-tile.is-active::before { opacity: 1; }
+.gumi-tile.is-active::after { opacity: .5; }
 /* The head render is cropped tight and normalised (same front width and centre for all four), so one rule
    places every head identically: 95% of the frame's width, centred. */
 .gumi-tile__head {
@@ -917,27 +924,17 @@ button { font: inherit; color: inherit; }
   78%  { scale: .96; rotate: calc(var(--tilt, -4deg) - 2deg); }
   100% { opacity: 1; scale: 1; rotate: var(--tilt, -4deg); }
 }
-.gumi-tile:focus-visible { z-index: 2; }
-.gumi-tile:focus-visible .gumi-tile__name { opacity: 1; animation: gumi-plate-pop .6s var(--ease) both; }
-@media (hover: hover) {
-  .gumi-tile:hover { z-index: 2; }
-  .gumi-tile:hover .gumi-tile__name { opacity: 1; animation: gumi-plate-pop .6s var(--ease) both; }
-}
+.gumi-tile.is-active { z-index: 2; }
+.gumi-tile.is-active .gumi-tile__name { opacity: 1; animation: gumi-plate-pop .6s var(--ease) both; }
 @media (hover: none) {
   .gumi-tile__name { top: 84%; opacity: 1; font-size: clamp(18px, 5.4vw, 26px); border-width: 2px; box-shadow: 3px 3px 0 #111111; }
   .gumi-tile__head { translate: 0 -7%; }
 }
 /* The lift: the head scales toward you, rises and tilts, breaking past the frame's edge. Motion only. */
 @media (prefers-reduced-motion: no-preference) {
-  .gumi-tile:focus-visible .gumi-tile__head {
+  .gumi-tile.is-active .gumi-tile__head {
     transform: translateY(-7%) scale(1.14) rotate(-4deg);
     filter: drop-shadow(0 18px 20px rgba(0, 0, 0, .28));
-  }
-  @media (hover: hover) {
-    .gumi-tile:hover .gumi-tile__head {
-      transform: translateY(-7%) scale(1.14) rotate(-4deg);
-      filter: drop-shadow(0 18px 20px rgba(0, 0, 0, .28));
-    }
   }
 }
 
@@ -952,12 +949,14 @@ button { font: inherit; color: inherit; }
 .gumizoo__poster img { width: 100%; height: 100%; object-fit: cover; }
 
 /* Desktop, per the sketch: heading on top, the 2×2 grid, and the poster beside it at the grid's full height,
-   all inside the standard .wrap. The grid is square and the poster 9:16, so the content width (less one
-   gutter) splits 1 : .5625; capped by the viewport height so both fit on screen. */
+   the materials note below both, all inside the standard .wrap. The grid is square and the poster 9:16, so
+   the content width (less one gutter) splits 1 : .5625 — but the section fitting one screen, no scroll, is
+   what actually sizes the block: work backward from the height left over once the heading/tagline, the
+   materials note and the section's own padding are accounted for (matching their real rendered size, via the
+   same clamp() expressions their type uses), and only then does width get a say, as a ceiling so the block
+   never runs past the standard --max container on a wide-and-tall screen. Legibility of the tiles/poster
+   matters, but fitting without a scroll takes priority over how big they end up. */
 @media (min-width: 900px) {
-  /* Framed as one screen: the section is a viewport tall (under the nav) with the block centred in it, and
-     the block is sized so heading + grid + poster always fit that height, with the same 40px above and below
-     and equal space left and right. */
   .gumizoo {
     --pad: 40px;
     display: grid;
@@ -967,15 +966,19 @@ button { font: inherit; color: inherit; }
   }
   .gumizoo__grid {
     --gutter-grid: 24px;
-    --head-h: calc(12px * 1.4 + 14px + clamp(44px, 7vw, 96px) * .88);
+    /* .gumizoo__head's real height: the "Character collection" label, a 14px gap, the GUMIZOO heading, another
+       14px gap, then the tagline — each term the exact font-size expression that field uses. */
+    --head-h: calc(16.8px + 14px + clamp(44px, 7vw, 96px) * .88 + 14px + clamp(24px, 2.8vw, 34px) * .95);
+    --materials-h: 16.8px; /* the materials note, one line of .label */
     --t: min(
       (min(100cqi - 2 * var(--gutter), var(--max)) - var(--gutter-grid)) / 1.5625,
-      100svh - var(--nav-h) - 2 * var(--pad) - var(--head-h) - var(--gutter-grid) - 4px
+      100svh - var(--nav-h) - 2 * var(--pad) - var(--head-h) - var(--materials-h) - 2 * 24px - 4px
     );
     grid-template-columns: var(--t) calc(var(--t) * .5625);
-    grid-template-areas: "head head" "tiles poster";
+    grid-template-areas: "head head" "tiles poster" "materials materials";
     justify-content: center;
   }
+  .gumizoo__materials { margin-top: -4px; }
   .gumizoo__poster { width: 100%; }
 }
 
@@ -1285,6 +1288,11 @@ button { font: inherit; color: inherit; }
     radial-gradient(110% 80% at 15% 0%, color-mix(in oklab, var(--accent), white 28%), transparent 60%),
     radial-gradient(90% 70% at 100% 100%, color-mix(in oklab, var(--accent), black 22%), transparent 65%);
 }
+/* While cycling between Felines (main.js), cards scatter well past the dialog's edge; since overflow-y: auto
+   alone makes overflow-x effectively auto too (the CSS overflow-x/-y interaction), that transit briefly grows
+   the dialog's scrollable area on both axes and shows scrollbars for space that's never actually visible
+   (.board fills the viewport already). Suppressed for exactly the cycle. */
+.board.is-cycling { overflow: hidden; }
 .board::backdrop { background: var(--accent); }
 .board [hidden] { display: none !important; }
 .board::before {
@@ -1603,8 +1611,12 @@ button { font: inherit; color: inherit; }
 .gumi-panel__more:empty { display: none; }
 .gumi-panel__more video {
   display: block;
-  width: 100%;
-  max-width: 440px;
+  /* Kept modest and, below an 800px-tall viewport, self-shrinking: it's a bonus clip, not the panel's main
+     draw, and its height is the one thing that made Nanju's panel (the only one with a video) run taller than
+     the other three's and force a scroll. Untouched above 800px tall (max-width simply binds at 320px);
+     between 650 and 800 it eases down; never smaller than 200px. See the sheet padding/columns tweak below,
+     the other half of this fix. */
+  width: clamp(200px, calc(320px - (800px - 100svh) * .8), 320px);
   aspect-ratio: 16 / 9;
   background: #111111;
   border: 6px solid #FFFFFF;
@@ -1612,11 +1624,16 @@ button { font: inherit; color: inherit; }
 }
 
 @media (min-width: 900px) {
+  /* Sized so all four panels (Nanju's, with its extra video slot, included) fit one screen without scrolling.
+     Model and text column stay the same relative size on all four (nothing here is per-character): a touch
+     less top/bottom padding, a touch more width for the text column (which also shortens the stamp/bio's
+     wrapped line count), and a tighter row-gap. */
   .gumi-panel__sheet {
-    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
     grid-template-rows: 1fr auto auto auto auto 1fr;
-    column-gap: 48px;
-    row-gap: 18px;
+    padding-block: 64px 40px;
+    column-gap: 44px;
+    row-gap: 14px;
   }
   .gumi-panel__model { grid-area: 1 / 1 / 7 / 2; align-self: center; width: 100%; }
   .gumi-panel__stamp { grid-area: 2 / 2; transform: rotate(-2deg); }

@@ -580,6 +580,10 @@
   async function cycleBoard(step) {
     if (!board.open || cycling) return;
     cycling = true;
+    // The scatter sends cards well past the edge of the (viewport-filling) dialog; .board's scrollable
+    // overflow otherwise grows to include that off-screen transit, showing a scrollbar for space nothing
+    // is ever actually visible in. Suppressed for exactly the cycle, restored below (both return paths).
+    board.classList.add('is-cycling');
     const next = BOARD_CYCLE[wrapIndex(boardIndex + step)];
     boardCard = document.querySelector(`.card[data-slug="${next.slug}"]`) || boardCard;
     boardLive.textContent = `${next.title}, ${next.meta}. ${wrapIndex(boardIndex + step) + 1} of ${BOARD_CYCLE.length}`;
@@ -587,6 +591,7 @@
     if (reduceMotion.matches || !Element.prototype.animate) {
       fillBoard(next);
       board.scrollTop = 0;
+      board.classList.remove('is-cycling');
       cycling = false;
       return;
     }
@@ -626,6 +631,7 @@
       { duration: 620, easing: EASE_OUT },
     );
     await Promise.all([...entries, flipIn].map((a) => a.finished.catch(() => {})));
+    board.classList.remove('is-cycling');
     cycling = false;
   }
 
@@ -796,16 +802,32 @@
         type: 'button', class: 'gumi-tile', 'data-slug': c.slug, 'aria-haspopup': 'dialog',
         'aria-label': `${c.name} ${c.surname}. ${c.alt}${c.video ? ` Includes the video ${c.video.title}.` : ''}`,
       }, [
-        h('img', { class: 'gumi-tile__head', src: still(c), alt: '', width: '770', height: '606', loading: 'lazy', decoding: 'async' }),
+        h('img', { class: 'gumi-tile__head', src: still(c), alt: '', width: '1230', height: '963', loading: 'lazy', decoding: 'async' }),
         h('span', { class: 'gumi-tile__name', 'aria-hidden': 'true' }, [c.name, ' ', h('span', {}, c.surname)]),
       ]);
       setAccent(tile, c.accent);
       tiles.append(h('li', {}, tile));
     }
 
-    // Hover/focus: the tile floods itself (CSS); here the heading takes this head's accent (black again when
-    // nothing is hovered), and its turntable starts loading for the click.
-    const flood = (c) => {
+    // Hover/focus: an explicit .is-active class (not :hover/:focus-visible) drives the tile's flood and
+    // nameplate, so the click-to-open and close-return-focus paths below can reliably switch it off — a
+    // pseudo-class would keep matching through the focus the dialog returns on close, and (since the dialog
+    // sat right over the tile) through the synthetic pointerover Chromium fires once the dialog is gone and
+    // the still-stationary cursor is suddenly back over the tile. The heading takes the active tile's accent
+    // (black again when nothing's active), and its turntable starts loading for the click.
+    let activeTile = null;
+    let suppressActivation = false;
+    // Two frames covers both the dialog's own synchronous focus-restore and Chromium's next-frame synthetic
+    // pointerover (see closeGumi below) without resorting to an arbitrary setTimeout delay.
+    const releaseActivationGuard = () => {
+      requestAnimationFrame(() => requestAnimationFrame(() => { suppressActivation = false; }));
+    };
+    const setActive = (tile) => {
+      if (activeTile === tile || (tile && suppressActivation)) return;
+      if (activeTile) activeTile.classList.remove('is-active');
+      activeTile = tile;
+      if (tile) tile.classList.add('is-active');
+      const c = tile && bySlug(tile.dataset.slug);
       if (c) {
         gumizoo.style.setProperty('--title-accent', c.accent);
         loadSprite(c);
@@ -815,17 +837,17 @@
     };
     tiles.addEventListener('pointerover', (e) => {
       const tile = e.target.closest('.gumi-tile');
-      if (tile && e.pointerType === 'mouse') flood(bySlug(tile.dataset.slug));
+      if (tile && e.pointerType === 'mouse') setActive(tile);
     });
     tiles.addEventListener('pointerleave', (e) => {
-      if (e.pointerType === 'mouse' && !tiles.contains(document.activeElement)) flood(null);
+      if (e.pointerType === 'mouse' && !tiles.contains(document.activeElement)) setActive(null);
     });
     tiles.addEventListener('focusin', (e) => {
       const tile = e.target.closest('.gumi-tile');
-      if (tile) flood(bySlug(tile.dataset.slug));
+      if (tile) setActive(tile);
     });
     tiles.addEventListener('focusout', (e) => {
-      if (!tiles.contains(e.relatedTarget) && !gumiPanel.open) flood(null);
+      if (!tiles.contains(e.relatedTarget) && !gumiPanel.open) setActive(null);
     });
 
     let gumiTile = null;
@@ -834,13 +856,15 @@
     openGumi = async (tile) => {
       const c = bySlug(tile.dataset.slug);
       gumiTile = tile;
+      // Reset the tile's hover/active look the instant it's clicked — same as if the cursor had moved off it —
+      // rather than leaving it lit until some later pointerleave/focusout that a click can pre-empt.
+      setActive(null);
       // Give the turntable a moment if it isn't in yet (usually it is: hover already started it).
       const ready = await Promise.race([loadSprite(c), wait(400).then(() => false)]);
       const turn = ready && !reduceMotion.matches;
       tileHead(tile).style.viewTransitionName = 'gumi-portrait';
       morph(() => {
         tileHead(tile).style.viewTransitionName = '';
-        flood(c);
         setAccent(gumiPanel, c.accent);
         gumiPanel.dataset.gumi = c.slug; // per-character text treatment (CSS)
         modelStill.src = still(c);
@@ -878,11 +902,23 @@
       spin.set(0);
       model.style.viewTransitionName = 'gumi-portrait';
       const head = gumiTile && tileHead(gumiTile);
+      // dialog.close() restores focus to whatever had it before showModal() synchronously, as part of the call
+      // itself, and — since the dialog sat right over the tile — revealing the tile again also fires a
+      // synthetic pointerover once the (real, still-stationary) cursor is back over it. With the view
+      // transition running, that reveal doesn't happen until the whole ~0.55s cross-fade settles, so the guard
+      // has to stay up for the transition's full length, not just the synchronous close() call — hence tying
+      // its release to morph()'s own promise (which is exactly that transition's .finished) rather than a
+      // fixed delay.
+      suppressActivation = true;
       morph(() => {
         model.style.viewTransitionName = '';
         if (head) head.style.viewTransitionName = 'gumi-portrait';
         gumiPanel.close();
-      }).finally(() => { if (head) head.style.viewTransitionName = ''; });
+        if (gumiTile) gumiTile.focus();
+      }).finally(() => {
+        if (head) head.style.viewTransitionName = '';
+        releaseActivationGuard();
+      });
     };
 
     // Turning in the panel: drag across (the model's full width is one full turn) or arrow keys, 10° a step.
@@ -922,7 +958,13 @@
     gumiPanel.addEventListener('close', () => {
       more.replaceChildren();
       document.documentElement.classList.remove('is-locked');
-      if (gumiTile) gumiTile.focus();
+      // Belt-and-braces: closeGumi() already guards its own close()+focus() — this only matters if the dialog
+      // is ever closed some other way that skips it entirely.
+      if (gumiTile && document.activeElement !== gumiTile) {
+        suppressActivation = true;
+        gumiTile.focus();
+        releaseActivationGuard();
+      }
     });
   }
 
