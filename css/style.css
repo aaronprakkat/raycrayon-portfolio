@@ -968,12 +968,18 @@ button { font: inherit; color: inherit; }
        from this stack or the grid gaps is a px the no-scroll --t budget can give back to the tiles/poster. */
     --head-h: calc(16.8px + 8px + clamp(44px, 7vw, 88px) * .88 + 8px + clamp(22px, 2.4vw, 26px) * .95);
     --materials-h: 16.8px; /* the materials note, one line of .label */
+    /* The poster's cell spans the head row too (grid-template-areas below), so its own height budget is
+       head-h + one gap + the tile block's height, not just the tile block alone: extra height "borrowed" from
+       space the heading row already occupies, at no extra cost to the section's total height. --t (the tile
+       block's own size) is unaffected by this and keeps the same height-derived term as before; only the
+       width-derived term changes, since the poster's width is no longer simply --t * .5625 — solving
+       t + gutter-grid + (head-h + gutter-grid + t) * .5625 <= availableWidth for t gives the expression below. */
     --t: min(
-      (min(100cqi - 2 * var(--gutter), var(--max)) - var(--gutter-grid)) / 1.5625,
+      (min(100cqi - 2 * var(--gutter), var(--max)) - 1.5625 * var(--gutter-grid) - .5625 * var(--head-h)) / 1.5625,
       100svh - var(--nav-h) - 2 * var(--pad) - var(--head-h) - var(--materials-h) - 2 * var(--gutter-grid) - 2px
     );
-    grid-template-columns: var(--t) calc(var(--t) * .5625);
-    grid-template-areas: "head head" "tiles poster" "materials materials";
+    grid-template-columns: var(--t) calc((var(--head-h) + var(--gutter-grid) + var(--t)) * .5625);
+    grid-template-areas: "head poster" "tiles poster" "materials materials";
     justify-content: start;
   }
   .gumizoo__head { gap: 8px; }
