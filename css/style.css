@@ -815,7 +815,12 @@ button { font: inherit; color: inherit; }
   gap: 24px var(--gutter-grid);
   grid-template-areas: "head" "tiles" "poster" "materials";
 }
-.gumizoo__head { grid-area: head; display: grid; gap: 14px; }
+/* Same heading-beside-description composition as .project-head (Pangeo etc.): the description sits at full
+   row width, using the space the tiles/poster below don't need at every width — not a plain stack under the
+   tagline. */
+.gumizoo__head { grid-area: head; display: grid; gap: 14px 48px; }
+.gumizoo__head > div { display: grid; gap: 14px; }
+.gumizoo__intro { max-width: 52ch; align-self: end; }
 .gumizoo__tagline {
   font: 400 clamp(24px, 2.8vw, 34px)/.95 var(--display);
   color: var(--muted);
@@ -967,17 +972,24 @@ button { font: inherit; color: inherit; }
   .gumizoo__grid {
     --gutter-grid: 24px;
     /* .gumizoo__head's real height: the "Character collection" label, a 14px gap, the GUMIZOO heading, another
-       14px gap, then the tagline — each term the exact font-size expression that field uses. */
+       14px gap, then the tagline — each term the exact font-size expression that field uses. The intro
+       paragraph beside it is Inter body copy at a fixed size, well short of that stack even at 2-3 lines, so
+       it never becomes the row's tallest column and doesn't need its own term here. */
     --head-h: calc(16.8px + 14px + clamp(44px, 7vw, 96px) * .88 + 14px + clamp(24px, 2.8vw, 34px) * .95);
     --materials-h: 16.8px; /* the materials note, one line of .label */
     --t: min(
       (min(100cqi - 2 * var(--gutter), var(--max)) - var(--gutter-grid)) / 1.5625,
       100svh - var(--nav-h) - 2 * var(--pad) - var(--head-h) - var(--materials-h) - 2 * 24px - 4px
     );
-    grid-template-columns: var(--t) calc(var(--t) * .5625);
-    grid-template-areas: "head head" "tiles poster" "materials materials";
-    justify-content: center;
+    /* Head (and its intro paragraph) spans the full standard content width, same as every other section's
+       heading — only the tiles/poster block below is capped to --t; a 3rd, unnamed column just absorbs
+       whatever width that leaves. Left-aligned (not centred): every other section's heading sits flush at the
+       standard gutter, and centring only reads right when the block is close to the container's full width. */
+    grid-template-columns: var(--t) calc(var(--t) * .5625) 1fr;
+    grid-template-areas: "head head head" "tiles poster ." "materials materials .";
+    justify-content: start;
   }
+  .gumizoo__head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: end; }
   .gumizoo__materials { margin-top: -4px; }
   .gumizoo__poster { width: 100%; }
 }

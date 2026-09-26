@@ -706,12 +706,36 @@
   const SPIN_COLS = 6;
   // Phones get the 480px-a-frame sprite (2880px sheet): the 720px one decodes to ~75 MB, too much for a phone.
   const spriteSrc = (c) => `media/stills/gumizoo-${c.slug}-turn${matchMedia('(max-width: 699px)').matches ? '-480' : ''}.webp`;
+
+  // Fetching the sprite (below) only gets its bytes into the HTTP cache — the browser still has to decode and
+  // rasterise all ~40MP of it the first time it's actually painted, which otherwise happens right as the panel
+  // opens: a single ~300-400ms frame, a visible stall, right when smoothness matters most. A background-image
+  // usage on a real (if invisible) composited element pays that cost once, ahead of time, on whatever hover or
+  // idle time is available, so the decode is already warm by the time the actual panel needs it.
+  let spriteWarmer = null;
+  const warmSprite = (c) => {
+    if (!spriteWarmer) {
+      spriteWarmer = h('div', { 'aria-hidden': 'true' });
+      // Sized close to the panel model's largest real on-screen size (--gumi-ar) so the browser rasterises at
+      // roughly the scale it'll actually need, not some other cached size it'd have to redo the work for anyway.
+      // (--gumi-ar)'s raw value is "1230 / 963" — var() substitutes those tokens literally, so without the
+      // extra parens this would parse as 800px / 1230 / 963 (three-way left-to-right division), not 800px
+      // divided by the ratio. opacity is .01, not 0: a fully-transparent element is indistinguishable from
+      // unpainted, and the browser can (and does, measured) skip the actual decode/rasterise work for it —
+      // .01 is still visually nothing but forces the real paint pipeline to run.
+      spriteWarmer.style.cssText = 'position:fixed; inset:auto 0 0 auto; width:800px; height:calc(800px / (var(--gumi-ar))); opacity:.01; pointer-events:none;';
+      document.body.append(spriteWarmer);
+    }
+    spriteWarmer.style.background = `no-repeat 0 0 / 600% 600% ${cssUrl(spriteSrc(c))}`;
+    void spriteWarmer.offsetHeight; // force layout so the paint (and so the decode) isn't deferred further
+  };
+
   const spriteLoads = {};
   const loadSprite = (c) => {
     if (!spriteLoads[c.slug]) {
       spriteLoads[c.slug] = new Promise((resolve) => {
         const img = new Image();
-        img.onload = () => resolve(true);
+        img.onload = () => { warmSprite(c); resolve(true); };
         img.onerror = () => resolve(false);
         img.src = spriteSrc(c);
       });
