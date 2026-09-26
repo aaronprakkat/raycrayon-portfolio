@@ -10,9 +10,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap">
+  <!-- Gumizoo title face, subset to its six letters (a few KB); see js/gumi-title.js -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&text=GUMIZO&display=swap">
   <link rel="stylesheet" href="css/style.css">
   <script src="js/projects.js" defer></script>
   <script src="js/main.js" defer></script>
+  <script src="js/gumi-title.js" defer></script>
 </head>
 <body>
   <a class="skip" href="#work">Skip to work</a>
@@ -88,7 +91,7 @@
         <div class="wrap gumizoo__grid">
           <div class="gumizoo__head">
             <p class="label">Character collection</p>
-            <h3 class="project-title" id="gumizoo-title">Gumizoo</h3>
+            <h3 class="project-title" id="gumizoo-title"><span class="gumi-title"><span class="gumi-title__text">Gumizoo</span><canvas class="gumi-title__gl" aria-hidden="true"></canvas></span></h3>
             <h4 class="gumizoo__tagline">Four forms of stupidity</h4>
           </div>
           <ul class="gumizoo__tiles" aria-label="The four gumis"></ul>
