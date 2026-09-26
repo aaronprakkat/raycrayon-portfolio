@@ -772,18 +772,77 @@ button { font: inherit; color: inherit; }
   position: relative;
   container-type: inline-size;
 }
+/* The plain Bebas heading is the fallback: it's what shows until the gummy title's images have decoded (main.js
+   adds .is-candy), and for good if they never do, or under forced colors. It recolors the same way. */
 .gumizoo .project-title {
   color: var(--title-accent, #111111);
   transition: color .3s var(--ease);
-  /* Restrained extruded/letterpress depth: flat stepped layers in the brand's own ink tone, not tied to
-     currentColor (a shadow derived from currentColor would nearly vanish at rest, since the resting color is
-     already near-black) — so the same depth reads under every accent and at rest. Only text-shadow is added
-     here; color/transition above are untouched, so the hover recolor keeps working exactly as before. */
+  /* Stepped flat ink-tone layers, not tied to currentColor, so the depth reads at rest and under every accent. */
   text-shadow:
     1px 1px 0 rgba(17, 17, 17, .35),
     2px 2px 0 rgba(17, 17, 17, .28),
     3px 3px 0 rgba(17, 17, 17, .20),
     4px 4px 8px rgba(17, 17, 17, .18);
+}
+.gumi-title { display: none; }
+
+/* The gummy title: GUMIZOO rendered once in Cycles as neutral gummy candy (see CLAUDE.md), exported as three
+   grayscale passes and tinted live here from --title-accent, the same variable main.js's setActive() already sets
+   and clears — so the hover recolor (and its .3s transition, instant under reduced motion) is unchanged.
+   - the element's own fill is the accent, masked to the letters by the shade pass's alpha;
+   - ::before multiplies the shade pass over it (form: lit top-left, deeper core, darker extrusion);
+   - __glow lets a lighter accent through where light passes through the candy (its alpha is the glow);
+   - __gloss is the white highlights, on top.
+   Only in normal color mode: forced colors keep the plain text. */
+@media (forced-colors: none) {
+  .gumizoo.is-candy .gumi-title {
+    --candy: url("../media/stills/gumizoo-title-shade.webp");
+    --candy-ar: 1600 / 303; /* the render's canvas */
+    position: relative;
+    isolation: isolate;
+    display: block;
+    /* The render's own proportions (its canvas includes a little room for the highlights and extrusion); sized
+       off the heading's line box (.88em, the height .project-title already takes) so the section's layout,
+       including the desktop no-scroll budget (--head-h), doesn't move. A plain width + max-width, not
+       min(100%, ...): the head column shrink-wraps its content, so a percentage inside min() would resolve
+       against the (narrower) tagline and squeeze the title down to it. */
+    width: calc(.88em * var(--candy-ar));
+    max-width: 100%;
+    aspect-ratio: var(--candy-ar);
+    margin-inline: auto;
+    background-color: var(--title-accent, #111111);
+    -webkit-mask: var(--candy) 0 0 / 100% 100% no-repeat;
+    mask: var(--candy) 0 0 / 100% 100% no-repeat;
+    transition: background-color .3s var(--ease);
+  }
+  .gumizoo.is-candy .gumi-title::before,
+  .gumi-title__glow,
+  .gumi-title__gloss {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .gumizoo.is-candy .gumi-title::before {
+    background: var(--candy) 0 0 / 100% 100% no-repeat;
+    mix-blend-mode: multiply;
+  }
+  .gumi-title__glow {
+    --glow: url("../media/stills/gumizoo-title-glow.webp");
+    background-color: color-mix(in oklab, var(--title-accent, #111111), white 40%);
+    -webkit-mask: var(--glow) 0 0 / 100% 100% no-repeat;
+    mask: var(--glow) 0 0 / 100% 100% no-repeat;
+    transition: background-color .3s var(--ease);
+  }
+  .gumi-title__gloss { background: url("../media/stills/gumizoo-title-gloss.webp") 0 0 / 100% 100% no-repeat; }
+  .gumizoo.is-candy .gumi-title__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
 }
 
 /* Fragments: small motifs scattered on the detail panel. Slots (below) set position and size; the data only

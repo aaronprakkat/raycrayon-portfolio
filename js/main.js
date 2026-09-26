@@ -805,6 +805,14 @@
       src: GUMIZOO.poster.src, alt: GUMIZOO.poster.alt, width: '1080', height: '1920', loading: 'lazy', decoding: 'async',
     }));
 
+    // The gummy title (three pre-lit passes, tinted in CSS from --title-accent) only takes over from the plain
+    // heading once all three have decoded, so a missing or blocked file leaves readable text, not a blank mask.
+    Promise.all(['shade', 'glow', 'gloss'].map((pass) => {
+      const img = new Image();
+      img.src = `media/stills/gumizoo-title-${pass}.webp`;
+      return img.decode();
+    })).then(() => gumizoo.classList.add('is-candy'), () => {});
+
     // Panel fragments: a real cut-out ({ src }) or a placeholder crop of the 2D portrait ({ at, zoom, shape }).
     const fragment = (c, f) => {
       const el = h('span', { class: 'gumi-frag', 'data-shape': f.src ? null : f.shape });
