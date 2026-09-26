@@ -763,9 +763,11 @@ button { font: inherit; color: inherit; }
   }
 }
 
-/* Gumizoo: heading, a 2×2 grid of the four heads (Blender renders, see main.js) and the event poster beside it.
-   Hovering/focusing a tile lifts its head out of the frame, shows its name, floods that one tile with its
-   accent and turns the heading that accent (--title-accent, set by main.js). The section itself never floods. */
+/* Gumizoo: a centered heading over the four heads (Blender renders, see main.js), 2×2 on phones and one row of
+   four on desktop. Hovering/focusing a tile lifts its head out of the frame, shows its name, floods that one
+   tile with its accent and turns the heading that accent (--title-accent, set by main.js). The section itself
+   never floods. The event poster asset stays wired up in main.js (still fetched, still appended) but isn't
+   part of this section's visible layout — see .gumizoo__poster below. */
 .gumizoo {
   position: relative;
   container-type: inline-size;
@@ -773,6 +775,15 @@ button { font: inherit; color: inherit; }
 .gumizoo .project-title {
   color: var(--title-accent, #111111);
   transition: color .3s var(--ease);
+  /* Restrained extruded/letterpress depth: flat stepped layers in the brand's own ink tone, not tied to
+     currentColor (a shadow derived from currentColor would nearly vanish at rest, since the resting color is
+     already near-black) — so the same depth reads under every accent and at rest. Only text-shadow is added
+     here; color/transition above are untouched, so the hover recolor keeps working exactly as before. */
+  text-shadow:
+    1px 1px 0 rgba(17, 17, 17, .35),
+    2px 2px 0 rgba(17, 17, 17, .28),
+    3px 3px 0 rgba(17, 17, 17, .20),
+    4px 4px 8px rgba(17, 17, 17, .18);
 }
 
 /* Fragments: small motifs scattered on the detail panel. Slots (below) set position and size; the data only
@@ -805,28 +816,39 @@ button { font: inherit; color: inherit; }
 .gumi-frags--panel .gumi-frag:nth-child(7) { bottom: 8%; left: 52%; --s: 92px;  --r: 12deg; }
 .gumi-frags--panel .gumi-frag:nth-child(8) { bottom: 2%; right: 16%; --s: 118px; --r: -10deg; }
 
-/* Spacing is the brand grid's gutter (24px desktop, 12px phone) for both the tile gaps and the grid-to-poster
-   gap. Frames: a 2px ink border and a soft shadow, the same on all four tiles and the poster. */
+/* Spacing is the brand grid's gutter (24px desktop, 12px phone) for the tile gaps. Frames: a 2px ink border
+   and a soft shadow. justify-items: center centers the heading, tile row and materials line as independent
+   blocks (each sized to its own content) within the section, at every width. */
 .gumizoo__grid {
   --gutter-grid: 12px;
   --frame-border: 2px solid rgba(17, 17, 17, .78);
   --frame-shadow: 0 1px 2px rgba(0, 0, 0, .08), 0 14px 26px -10px rgba(0, 0, 0, .3);
   display: grid;
+  justify-items: center;
   gap: 24px var(--gutter-grid);
-  grid-template-areas: "head" "tiles" "poster" "materials";
+  grid-template-areas: "head" "tiles" "materials";
 }
-.gumizoo__head { grid-area: head; display: grid; gap: 14px; }
+.gumizoo__head { grid-area: head; display: grid; gap: 14px; text-align: center; }
 .gumizoo__tagline {
   font: 400 clamp(22px, 2.4vw, 28px)/.95 var(--display);
   color: var(--muted);
   text-transform: uppercase;
 }
-.gumizoo__materials { grid-area: materials; }
+.gumizoo__materials { grid-area: materials; text-align: center; }
 
 .gumizoo__tiles {
   grid-area: tiles;
+  /* justify-self: stretch overrides .gumizoo__grid's justify-items: center for this one item: its mobile
+     1fr columns need a definite, full-width container to resolve against (fit-content sizing, which
+     justify-items: center would otherwise give it, collapses fr tracks toward zero). Desktop's own explicit
+     px-wide columns (repeat(4, var(--tile-w)), below) don't depend on this either way, so it's harmless there. */
+  justify-self: stretch;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* justify-content: center positions the tile columns within this (now full-width, via justify-self: stretch
+     above) box: a no-op on mobile's 1fr columns, which already fill it, but what actually centers desktop's
+     explicit-width 4-column row (below) since that row is narrower than the stretched container. */
+  justify-content: center;
   gap: var(--gutter-grid);
 }
 /* Tile texture: one grainy-gradient stack that goes from quiet to bold. At rest a light neutral gradient with a
@@ -836,7 +858,9 @@ button { font: inherit; color: inherit; }
   isolation: isolate;
   display: block;
   width: 100%;
-  aspect-ratio: 1;
+  /* The head renders' own crop (1230:963, wider than tall — see the build note in CLAUDE.md) rather than a
+     forced square: matching the frame to the asset's real shape means no letterboxing and no cropping. */
+  aspect-ratio: var(--gumi-ar);
   padding: 0;
   border: var(--frame-border);
   background-color: #F6F3EB;
@@ -934,23 +958,17 @@ button { font: inherit; color: inherit; }
   }
 }
 
-.gumizoo__poster {
-  grid-area: poster;
-  justify-self: start;
-  width: min(100%, 420px);
-  aspect-ratio: 9 / 16;
-  border: var(--frame-border);
-  box-shadow: var(--frame-shadow);
-}
-.gumizoo__poster img { width: 100%; height: 100%; object-fit: cover; }
+/* Not part of this section's visible layout (see the top-of-file Gumizoo note) — main.js still unconditionally
+   fetches and appends the poster image here, so the element stays in the DOM for that; display:none just
+   takes it out of the flow instead of removing it, since removing it would break that querySelector. */
+.gumizoo__poster { display: none; }
 
-/* Desktop, per the sketch: heading top-left, the 2×2 grid directly under it, the poster beside the grid at
-   its full height, the materials note below both — one compact block, left-aligned at the standard gutter
-   like every other section's heading (not centred, and not stretched to span wider than the grid/poster
-   below it: a heading wider than what's under it is what read as a stray floating element last round).
-   The grid is square and the poster 9:16, so the content width (less one gutter) splits 1 : .5625; overhead
-   (padding, gaps, the heading stack) is kept as tight as it can be while still reading calmly, since every
-   px trimmed there is a px the grid/poster can use instead, within the one-screen-no-scroll budget. */
+/* Desktop: the centered heading sits above one row of four heads, sized to fit one viewport with no scroll —
+   the same no-scroll budget approach as before (a min() of a width- and a height-derived size), just simpler
+   with no poster term. Four-across is more width-hungry than the old 2×2 was, so this row ends up
+   width-bound rather than height-bound: it hits the standard --max cap on wide/short screens (1920×1080) with
+   a lot of spare height left over, which the section's own vertical centering (below) turns into calm
+   whitespace rather than a cramped row. */
 @media (min-width: 900px) {
   .gumizoo {
     --pad: 24px;
@@ -964,30 +982,23 @@ button { font: inherit; color: inherit; }
     gap: var(--gutter-grid);
     /* .gumizoo__head's real height: the "Character collection" label, an 8px gap, the GUMIZOO heading (capped
        lower here than .project-title's usual 96px, see below), another 8px gap, then the tagline (also capped
-       lower than its usual 28px) — each term the exact font-size expression that field uses. Every px trimmed
-       from this stack or the grid gaps is a px the no-scroll --t budget can give back to the tiles/poster. */
+       lower than its usual 28px) — each term the exact font-size expression that field uses. */
     --head-h: calc(16.8px + 8px + clamp(44px, 7vw, 88px) * .88 + 8px + clamp(22px, 2.4vw, 26px) * .95);
     --materials-h: 16.8px; /* the materials note, one line of .label */
-    /* The poster's cell spans the head row too (grid-template-areas below), so its own height budget is
-       head-h + one gap + the tile block's height, not just the tile block alone: extra height "borrowed" from
-       space the heading row already occupies, at no extra cost to the section's total height. --t (the tile
-       block's own size) is unaffected by this and keeps the same height-derived term as before; only the
-       width-derived term changes, since the poster's width is no longer simply --t * .5625 — solving
-       t + gutter-grid + (head-h + gutter-grid + t) * .5625 <= availableWidth for t gives the expression below. */
-    --t: min(
-      (min(100cqi - 2 * var(--gutter), var(--max)) - 1.5625 * var(--gutter-grid) - .5625 * var(--head-h)) / 1.5625,
-      100svh - var(--nav-h) - 2 * var(--pad) - var(--head-h) - var(--materials-h) - 2 * var(--gutter-grid) - 2px
+    /* --tile-w: the width of one tile (the row is 4 * tile-w + 3 * gutter-grid). .7829 = 963/1230, the head
+       render's own height:width ratio (see --gumi-ar), used here since aspect-ratio's shorthand form isn't
+       available inside a calc(). */
+    --tile-w: min(
+      (min(100cqi - 2 * var(--gutter), var(--max)) - 3 * var(--gutter-grid)) / 4,
+      (100svh - var(--nav-h) - 2 * var(--pad) - var(--head-h) - var(--materials-h) - 2 * var(--gutter-grid) - 2px) / .7829
     );
-    grid-template-columns: var(--t) calc((var(--head-h) + var(--gutter-grid) + var(--t)) * .5625);
-    grid-template-areas: "head poster" "tiles poster" "materials materials";
-    justify-content: start;
   }
+  .gumizoo__tiles { grid-template-columns: repeat(4, var(--tile-w)); }
   .gumizoo__head { gap: 8px; }
   /* Matches --head-h's caps above: Gumizoo-only, doesn't touch the shared .project-title/.gumizoo__tagline
      rules used elsewhere or on phones (this lives inside the 900px+ block already). */
   .gumizoo .project-title { font-size: clamp(44px, 7vw, 88px); }
   .gumizoo__tagline { font-size: clamp(22px, 2.4vw, 26px); }
-  .gumizoo__poster { width: 100%; }
 }
 
 /* Experience */
